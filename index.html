@@ -36,8 +36,8 @@
             }
 
             body.night-mode {
-                background-color: #1a1a1a;
-                color: #cccccc;
+                background-color: #0a0a0a;
+                color: #666666; /* Much dimmer gray for low light */
             }
 
             /* Main content container */
@@ -69,19 +69,23 @@
                 border-bottom-color: #404040;
             }
 
+            body.night-mode .time-section {
+                border-bottom-color: #2a2a2a; /* Even dimmer for night */
+            }
+
             .datetime-container {
                 flex: 1;
             }
 
             .time {
-                font-size: 250px;
+                font-size: 160px;
                 font-weight: 300;
                 line-height: 1;
                 letter-spacing: -2px;
             }
 
             .date {
-                font-size: 90px;
+                font-size: 68px;
                 font-weight: 400;
                 margin-top: 15px;
             }
@@ -94,7 +98,7 @@
             }
 
             .weather-temp {
-                font-size: 120px;
+                font-size: 96px;
                 font-weight: 300;
                 display: flex;
                 align-items: center;
@@ -142,7 +146,7 @@
             }
 
             body.night-mode .reminder-item {
-                background-color: #252525;
+                background-color: #1a1a1a; /* Slightly lighter than background for subtle contrast */
             }
 
             .reminder-time {
@@ -181,7 +185,7 @@
             }
 
             body.night-mode .featured-overlay {
-                background-color: rgba(26, 26, 26, 0.98);
+                background-color: rgba(10, 10, 10, 0.98);
             }
 
             .featured-content {
@@ -201,6 +205,10 @@
             body.night-mode .featured-content {
                 background-color: #333;
                 box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            }
+
+            body.night-mode .featured-content {
+                background-color: #1a1a1a;
             }
 
             .featured-icon {
@@ -298,7 +306,7 @@
             // Note: schedule: true means it shows in the list. Reminders without this only appear when featured.
             const DAILY_REMINDERS = [
                 {
-                    time: "08:00",
+                    time: "09:00",
                     text: "Morning medication",
                     featured: true,
                     icon: "💊",
@@ -312,11 +320,18 @@
                     schedule: false,
                 },
                 {
-                    time: "18:00",
+                    time: "17:00",
                     text: "Evening medication",
                     featured: true,
                     icon: "💊",
                     schedule: false,
+                },
+                {
+                    time: "10:30",
+                    text: "St. Paul's service",
+                    featured: true,
+                    icon: "💒",
+                    schedule: true,
                 },
                 // Add scheduled events here (appointments, calls, etc.)
                 // { time: "10:30", text: "Doctor appointment", featured: true, icon: "🏥", schedule: true },
@@ -329,17 +344,17 @@
             const RECURRING_REMINDERS = [
                 {
                     interval: 60,
-                    startTime: "08:00",
-                    endTime: "22:00",
-                    text: "Take a sip of water",
+                    startTime: "11:00",
+                    endTime: "19:00",
+                    text: "Take a drink of water or other beverage",
                     featured: true,
                     icon: "💧",
                 },
                 {
                     interval: 120,
-                    startTime: "09:00",
-                    endTime: "21:00",
-                    text: "Move your arms and stretch",
+                    startTime: "12:00",
+                    endTime: "19:00",
+                    text: "Move your arms and legs and stretch",
                     featured: true,
                     icon: "🤸",
                 },
@@ -435,6 +450,15 @@
 
                 updateDayNightMode();
                 checkReminders();
+
+                // Update weather icon if we have weather data (switches between sun/moon)
+                if (window.currentWeatherCode !== undefined) {
+                    const weatherInfo = getWeatherInfo(
+                        window.currentWeatherCode,
+                    );
+                    document.getElementById("weatherIcon").textContent =
+                        weatherInfo.icon;
+                }
             }
 
             // Fetch weather data
@@ -470,6 +494,9 @@
                             weatherInfo.icon;
                         document.getElementById("weatherDesc").textContent =
                             weatherInfo.description;
+
+                        // Store the weather code so we can update the icon when time changes
+                        window.currentWeatherCode = weatherCode;
                     }
                 } catch (error) {
                     console.error("Weather fetch error:", error);
@@ -480,10 +507,22 @@
 
             // Map weather codes to icons and descriptions
             function getWeatherInfo(code) {
+                const hour = new Date().getHours();
+                const isNightTime = hour >= 20 || hour < 6; // 8 PM to 6 AM
+
                 const weatherMap = {
-                    0: { icon: "☀️", description: "Clear sky" },
-                    1: { icon: "🌤️", description: "Mainly clear" },
-                    2: { icon: "⛅", description: "Partly cloudy" },
+                    0: {
+                        icon: isNightTime ? "🌙" : "☀️",
+                        description: "Clear sky",
+                    },
+                    1: {
+                        icon: isNightTime ? "🌙" : "🌤️",
+                        description: "Mainly clear",
+                    },
+                    2: {
+                        icon: isNightTime ? "☁️" : "⛅",
+                        description: "Partly cloudy",
+                    },
                     3: { icon: "☁️", description: "Overcast" },
                     45: { icon: "🌫️", description: "Foggy" },
                     48: { icon: "🌫️", description: "Foggy" },
@@ -508,7 +547,10 @@
                 };
 
                 return (
-                    weatherMap[code] || { icon: "🌤️", description: "Unknown" }
+                    weatherMap[code] || {
+                        icon: isNightTime ? "🌙" : "🌤️",
+                        description: "Unknown",
+                    }
                 );
             }
 
