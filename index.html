@@ -956,4 +956,65 @@
                 console.log('Midnight refresh - regenerating daily schedule');
                 location.reload();
                 return;
-       
+            }
+            
+            // During waking hours (8 AM - 10 PM), check for updates every 15 minutes
+            const isWakingHours = currentHour >= 8 && currentHour < 22;
+            const timeSinceLastCheck = Date.now() - lastRefreshCheck;
+            const fifteenMinutes = 15 * 60 * 1000;
+            
+            if (isWakingHours && timeSinceLastCheck >= fifteenMinutes) {
+                // Don't refresh if a featured reminder is currently showing
+                if (activeFeature) {
+                    console.log('Skipping refresh - featured reminder active');
+                    lastRefreshCheck = Date.now(); // Reset timer but don't refresh
+                    return;
+                }
+                
+                // Simple refresh during waking hours
+                console.log('Waking hours refresh - checking for updates');
+                lastRefreshCheck = Date.now();
+                location.reload();
+            }
+        }
+        
+        // Update location (can be called from console)
+        function updateLocation(newLocation) {
+            LOCATION = newLocation;
+            updateWeather();
+            console.log(`Location updated to: ${newLocation}`);
+        }
+
+        // Initialize
+        function init() {
+            updateTime();
+            updateWeather();
+            generateReminders();
+            
+            // Update time every second
+            setInterval(updateTime, 1000);
+            
+            // Check for refresh needs every minute
+            setInterval(checkForRefresh, 60 * 1000);
+            
+            // Update weather every 30 minutes
+            weatherUpdateInterval = setInterval(updateWeather, 30 * 60 * 1000);
+            
+            // Regenerate reminders at midnight
+            setInterval(() => {
+                const now = new Date();
+                if (now.getHours() === 0 && now.getMinutes() === 0) {
+                    generateReminders();
+                }
+            }, 60 * 1000);
+            
+            console.log('Memory Display initialized');
+            console.log('Auto-refresh: Every 15 min (8 AM - 10 PM), midnight daily');
+            console.log('To update location, use: updateLocation("New Location")');
+        }
+
+        // Start when page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
