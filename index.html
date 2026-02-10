@@ -124,11 +124,23 @@
             text-align: center;
             font-size: 65px;
             font-weight: 500;
-            color: #321d6b;
             padding-top: 17px;
             padding-bottom: 20px;
             margin-bottom: 20px;
             border-bottom: 2px solid;
+        }
+
+        /* Caregiver colors by mode */
+        body.day-mode .caregiver-section {
+            color: #321d6b;  /* Purple for day */
+        }
+
+        body.evening-mode .caregiver-section {
+            color: #d4dbc1;  /* Sage green for evening */
+        }
+
+        body.night-mode .caregiver-section {
+            color: #666666;  /* Dim gray for night - matches night mode text */
         }
 
         body.day-mode .caregiver-section {
@@ -749,6 +761,16 @@
             let caregiverName = "";
             let isNightShift = currentHour >= 19 || currentHour < 7; // 7 PM to 6:59 AM
             
+            // Determine which heart emoji to use based on time of day
+            let heartEmoji;
+            if (currentHour >= 8 && currentHour < 18) {
+                heartEmoji = "💜";  // Day mode: purple heart
+            } else if (currentHour >= 18 && currentHour < 21) {
+                heartEmoji = "💚";  // Evening mode: green heart
+            } else {
+                heartEmoji = "🩶";  // Night mode: gray heart
+            }
+            
             if (isNightShift) {
                 // Night shift (7 PM - 6:59 AM)
                 // For hours 0-6 (midnight to 6:59 AM), use YESTERDAY's night shift
@@ -778,7 +800,7 @@
                 // Display with "tonight" wording
                 const caregiverElement = document.getElementById('caregiverName');
                 if (caregiverName) {
-                    caregiverElement.textContent = `${caregiverName} is here tonight 💜`;
+                    caregiverElement.textContent = `${caregiverName} is here tonight ${heartEmoji}`;
                     caregiverElement.style.display = 'block';
                 } else {
                     caregiverElement.style.display = 'none';
@@ -801,7 +823,7 @@
                 // Display with "today" wording
                 const caregiverElement = document.getElementById('caregiverName');
                 if (caregiverName) {
-                    caregiverElement.textContent = `${caregiverName} is here today 💜`;
+                    caregiverElement.textContent = `${caregiverName} is here today ${heartEmoji}`;
                     caregiverElement.style.display = 'block';
                 } else {
                     caregiverElement.style.display = 'none';
