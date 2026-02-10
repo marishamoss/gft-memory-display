@@ -1,768 +1,1042 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memory Display</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-            transition: background-color 0.5s ease, color 0.5s ease;
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Day/Night mode styles */
-        body.day-mode {
-            background-color: #d4dbc1;
-            color: #1a1a1a;
-        }
-
-        body.evening-mode {
-            background-color: #2a2a2a;
-            color: #e8e8e8;
-        }
-
-        body.night-mode {
-            background-color: #0a0a0a;
-            color: #666666;  /* Much dimmer gray for low light */
-        }
-
-        /* Main content container */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 40px;
-        }
-
-        /* Time and Date Section - Takes up 50% of screen */
-        .time-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 30px;
-            border-bottom: 3px solid;
-            min-height: 50vh;
-            flex: 0 0 50%;
-        }
-
-        body.day-mode .time-section {
-            border-bottom-color: #b5bd9a;
-        }
-
-        body.evening-mode .time-section,
-        body.night-mode .time-section {
-            border-bottom-color: #404040;
-        }
-        
-        body.night-mode .time-section {
-            border-bottom-color: #2a2a2a;  /* Even dimmer for night */
-        }
-
-        .datetime-container {
-            flex: 1;
-        }
-
-        .time {
-            font-size: 160px;
-            font-weight: 300;
-            line-height: 1;
-            letter-spacing: -2px;
-        }
-
-        .date {
-            font-size: 68px;
-            font-weight: 400;
-            margin-top: 15px;
-        }
-
-        .weather-container {
-            text-align: right;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
-
-        .weather-temp {
-            font-size: 96px;
-            font-weight: 300;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .weather-icon {
-            font-size: 100px;
-        }
-
-        .weather-description {
-            font-size: 40px;
-            margin-top: 10px;
-            opacity: 0.8;
-        }
-
-        /* Schedule Section */
-        .reminders-section {
-            flex: 1;
-            overflow-y: auto;
-            padding-top: 20px;
-        }
-
-        .reminders-title {
-            font-size: 42px;
-            font-weight: 600;
-            margin-bottom: 25px;
-            opacity: 0.9;
-        }
-
-        .reminder-item {
-            font-size: 36px;
-            padding: 18px 24px;
-            margin-bottom: 15px;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
-
-        body.day-mode .reminder-item {
-            background-color: #c5cdb0;
-        }
-
-        body.evening-mode .reminder-item {
-            background-color: #363636;
-        }
-
-        body.night-mode .reminder-item {
-            background-color: #1a1a1a;  /* Slightly lighter than background for subtle contrast */
-        }
-
-        .reminder-time {
-            font-weight: 600;
-            margin-right: 15px;
-        }
-
-        .reminder-text {
-            opacity: 0.9;
-        }
-
-        /* Featured Reminder Overlay */
-        .featured-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .featured-overlay.active {
-            display: flex;
-        }
-
-        body.day-mode .featured-overlay {
-            background-color: rgba(212, 219, 193, 0.98);
-        }
-
-        body.evening-mode .featured-overlay {
-            background-color: rgba(42, 42, 42, 0.98);
-        }
-
-        body.night-mode .featured-overlay {
-            background-color: rgba(10, 10, 10, 0.98);
-        }
-
-        .featured-content {
-            text-align: center;
-            padding: 60px;
-            border-radius: 20px;
-            max-width: 80%;
-            animation: pulseIn 0.5s ease;
-        }
-
-        body.day-mode .featured-content {
-            background-color: #e8efd9;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-        }
-
-        body.evening-mode .featured-content,
-        body.night-mode .featured-content {
-            background-color: #333;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        }
-        
-        body.night-mode .featured-content {
-            background-color: #1a1a1a;
-        }
-
-        .featured-icon {
-            font-size: 120px;
-            margin-bottom: 30px;
-        }
-
-        .featured-time {
-            font-size: 72px;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-
-        .featured-text {
-            font-size: 64px;
-            font-weight: 500;
-            line-height: 1.3;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Memory Display</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
             }
-            to {
-                opacity: 1;
-            }
-        }
 
-        @keyframes pulseIn {
-            0% {
-                transform: scale(0.9);
-                opacity: 0;
+            body {
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", Arial,
+                    sans-serif;
+                transition:
+                    background-color 0.5s ease,
+                    color 0.5s ease;
+                overflow: hidden;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
             }
-            50% {
-                transform: scale(1.02);
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
 
-        /* Loading state */
-        .loading {
-            opacity: 0.5;
-        }
-    </style>
-</head>
-<body>
-    <div class="main-content">
-        <div class="time-section">
-            <div class="datetime-container">
-                <div class="time" id="time">--:--</div>
-                <div class="date" id="date">Loading...</div>
-            </div>
-            <div class="weather-container">
-                <div class="weather-temp">
-                    <span class="weather-icon" id="weatherIcon">☀️</span>
-                    <span id="temperature">--°</span>
+            /* Day/Night mode styles */
+            body.day-mode {
+                background-color: #d4dbc1;
+                color: #1a1a1a;
+            }
+
+            body.evening-mode {
+                background-color: #2a2a2a;
+                color: #e8e8e8;
+            }
+
+            body.night-mode {
+                background-color: #0a0a0a;
+                color: #666666; /* Much dimmer gray for low light */
+            }
+
+            /* Main content container */
+            .main-content {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                padding: 40px;
+            }
+
+            /* Time and Date Section - Takes up 50% of screen */
+            .time-section {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+                padding-bottom: 30px;
+                border-bottom: 3px solid;
+                min-height: 50vh;
+                flex: 0 0 50%;
+            }
+
+            body.day-mode .time-section {
+                border-bottom-color: #b5bd9a;
+            }
+
+            body.evening-mode .time-section,
+            body.night-mode .time-section {
+                border-bottom-color: #404040;
+            }
+
+            body.night-mode .time-section {
+                border-bottom-color: #2a2a2a; /* Even dimmer for night */
+            }
+
+            .datetime-container {
+                flex: 1;
+            }
+
+            .time {
+                font-size: 200px;
+                font-weight: 300;
+                line-height: 1;
+                letter-spacing: -2px;
+            }
+
+            .date {
+                font-size: 90px;
+                font-weight: 400;
+                margin-top: 15px;
+            }
+
+            .weather-container {
+                text-align: right;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+            }
+
+            .weather-temp {
+                font-size: 96px;
+                font-weight: 300;
+                display: flex;
+                align-items: center;
+                gap: 20px;
+            }
+
+            .weather-icon {
+                font-size: 100px;
+            }
+
+            .weather-description {
+                font-size: 40px;
+                margin-top: 10px;
+                opacity: 0.8;
+            }
+
+            /* Schedule Section */
+            .reminders-section {
+                flex: 1;
+                overflow-y: auto;
+                padding-top: 20px;
+            }
+
+            /* Caregiver name display */
+            .caregiver-section {
+                text-align: center;
+                font-size: 70px;
+                font-weight: 500;
+                color: #321d6b;
+                margin-bottom: 30px;
+                padding-bottom: 25px;
+                border-bottom: 2px solid;
+            }
+
+            body.day-mode .caregiver-section {
+                border-bottom-color: #b5bd9a;
+            }
+
+            body.evening-mode .caregiver-section,
+            body.night-mode .caregiver-section {
+                border-bottom-color: #404040;
+            }
+
+            body.night-mode .caregiver-section {
+                border-bottom-color: #2a2a2a;
+            }
+
+            /* Two-column layout for schedule and suggestions */
+            .bottom-section {
+                display: flex;
+                gap: 30px;
+                flex: 1;
+                overflow: hidden;
+            }
+
+            .schedule-column {
+                flex: 2;
+                overflow-y: auto;
+            }
+
+            .suggestions-column {
+                flex: 1;
+                overflow-y: auto;
+            }
+
+            .reminders-title {
+                font-size: 42px;
+                font-weight: 600;
+                margin-bottom: 25px;
+                opacity: 0.9;
+            }
+
+            .reminder-item {
+                font-size: 36px;
+                padding: 18px 24px;
+                margin-bottom: 15px;
+                border-radius: 10px;
+                transition: all 0.3s ease;
+            }
+
+            body.day-mode .reminder-item {
+                background-color: #c5cdb0;
+            }
+
+            body.evening-mode .reminder-item {
+                background-color: #363636;
+            }
+
+            body.night-mode .reminder-item {
+                background-color: #1a1a1a; /* Slightly lighter than background for subtle contrast */
+            }
+
+            .reminder-time {
+                font-weight: 600;
+                margin-right: 15px;
+            }
+
+            .reminder-text {
+                opacity: 0.9;
+            }
+
+            /* Featured Reminder Overlay */
+            .featured-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                display: none;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+                animation: fadeIn 0.5s ease;
+            }
+
+            .featured-overlay.active {
+                display: flex;
+            }
+
+            body.day-mode .featured-overlay {
+                background-color: rgba(212, 219, 193, 0.98);
+            }
+
+            body.evening-mode .featured-overlay {
+                background-color: rgba(42, 42, 42, 0.98);
+            }
+
+            body.night-mode .featured-overlay {
+                background-color: rgba(10, 10, 10, 0.98);
+            }
+
+            .featured-content {
+                text-align: center;
+                padding: 60px;
+                border-radius: 20px;
+                max-width: 80%;
+                animation: pulseIn 0.5s ease;
+            }
+
+            body.day-mode .featured-content {
+                background-color: #e8efd9;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            }
+
+            body.evening-mode .featured-content,
+            body.night-mode .featured-content {
+                background-color: #333;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            }
+
+            body.night-mode .featured-content {
+                background-color: #1a1a1a;
+            }
+
+            .featured-icon {
+                font-size: 120px;
+                margin-bottom: 30px;
+            }
+
+            .featured-time {
+                font-size: 72px;
+                font-weight: 600;
+                margin-bottom: 20px;
+            }
+
+            .featured-text {
+                font-size: 64px;
+                font-weight: 500;
+                line-height: 1.3;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                }
+                to {
+                    opacity: 1;
+                }
+            }
+
+            @keyframes pulseIn {
+                0% {
+                    transform: scale(0.9);
+                    opacity: 0;
+                }
+                50% {
+                    transform: scale(1.02);
+                }
+                100% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+            /* Loading state */
+            .loading {
+                opacity: 0.5;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="main-content">
+            <div class="time-section">
+                <div class="datetime-container">
+                    <div class="time" id="time">--:--</div>
+                    <div class="date" id="date">Loading...</div>
                 </div>
-                <div class="weather-description" id="weatherDesc">Loading weather...</div>
+                <div class="weather-container">
+                    <div class="weather-temp">
+                        <span class="weather-icon" id="weatherIcon">☀️</span>
+                        <span id="temperature">--°</span>
+                    </div>
+                    <div class="weather-description" id="weatherDesc">
+                        Loading weather...
+                    </div>
+                </div>
+            </div>
+
+            <div class="reminders-section">
+                <div class="caregiver-section" id="caregiverName"></div>
+
+                <div class="bottom-section">
+                    <div class="schedule-column">
+                        <div class="reminders-title">Today's Schedule</div>
+                        <div id="remindersList"></div>
+                    </div>
+
+                    <div class="suggestions-column">
+                        <div class="reminders-title">For Today</div>
+                        <div id="suggestionsList"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="reminders-section">
-            <div class="reminders-title">Today's Schedule</div>
-            <div id="remindersList"></div>
+        <div class="featured-overlay" id="featuredOverlay">
+            <div class="featured-content">
+                <div class="featured-icon" id="featuredIcon">⏰</div>
+                <div class="featured-time" id="featuredTime"></div>
+                <div class="featured-text" id="featuredText"></div>
+            </div>
         </div>
-    </div>
 
-    <div class="featured-overlay" id="featuredOverlay">
-        <div class="featured-content">
-            <div class="featured-icon" id="featuredIcon">⏰</div>
-            <div class="featured-time" id="featuredTime"></div>
-            <div class="featured-text" id="featuredText"></div>
-        </div>
-    </div>
+        <audio id="reminderChime" preload="auto">
+            <!-- Gentle chime sound will be generated -->
+        </audio>
 
-    <audio id="reminderChime" preload="auto">
-        <!-- Gentle chime sound will be generated -->
-    </audio>
+        <script>
+            // ============================================
+            // CONFIGURATION SECTION - EDIT HERE
+            // ============================================
 
-    <script>
-        // ============================================
-        // CONFIGURATION SECTION - EDIT HERE
-        // ============================================
+            // Location for weather (ZIP code or "City, State")
+            let LOCATION = "20904";
 
-        // Location for weather (ZIP code or "City, State")
-        let LOCATION = "20904";
+            // ==================================================
+            // CAREGIVER - Shows "[Name] is here today 💜"
+            // ==================================================
 
-        // ==================================================
-        // SCHEDULED EVENTS - Shows in "Today's Schedule"
-        // ==================================================
-        
-        // ONE-TIME EVENTS (Specific dates)
-        // Format: { date: "YYYY-MM-DD", time: "HH:MM", text: "Event", featured: true/false, icon: "emoji" }
-        const SPECIFIC_DATE_EVENTS = [
-            // Example: { date: "2026-02-15", time: "14:30", text: "Doctor appointment", featured: true, icon: "🏥" },
-            // Example: { date: "2026-02-20", time: "10:00", text: "Call with insurance", featured: false, icon: "📞" },
-        ];
+            // WEEKLY CAREGIVERS (Regular schedule)
+            // Format: { dayOfWeek: 0-6, name: "Name" }
+            const WEEKLY_CAREGIVERS = [
+                { dayOfWeek: 1, name: "Aster" }, // Monday
+                { dayOfWeek: 2, name: "Aster" }, // Tuesday
+                { dayOfWeek: 3, name: "Aster" }, // Wednesday
+                { dayOfWeek: 4, name: "Aster" }, // Thursday
+                { dayOfWeek: 5, name: "Aster" }, // Friday
+                { dayOfWeek: 6, name: "Dionne" }, // Saturday
+                { dayOfWeek: 0, name: "Dionne" }, // Sunday
+            ];
 
-        // RECURRING WEEKLY EVENTS (Same day/time every week)
-        // Format: { dayOfWeek: 0-6 (0=Sunday, 6=Saturday), time: "HH:MM", text: "Event", featured: true/false, icon: "emoji" }
-        const WEEKLY_EVENTS = [
-            { dayOfWeek: 0, time: "10:30", text: "Church service", featured: false, icon: "⛪" },
-            // Example: { dayOfWeek: 3, time: "15:00", text: "Bridge club", featured: false, icon: "🎴" },
-            // Example: { dayOfWeek: 5, time: "11:00", text: "Hair appointment", featured: false, icon: "💇" },
-        ];
+            // SUBSTITUTE CAREGIVERS (Specific dates override weekly schedule)
+            // Format: { date: "YYYY-MM-DD", name: "Name" }
+            const SUBSTITUTE_CAREGIVERS = [
+                // Example: { date: "2026-02-15", name: "Maria" },
+            ];
 
-        // ==================================================
-        // REMINDERS - Only pop up, don't show in schedule
-        // ==================================================
+            // ==================================================
+            // SCHEDULED EVENTS - Shows in "Today's Schedule"
+            // ==================================================
 
-        // DAILY REMINDERS (Every day at specific times)
-        // Format: { time: "HH:MM", text: "Reminder", featured: true, icon: "emoji" }
-        // Note: These do NOT appear in schedule, only as pop-ups
-        const DAILY_REMINDERS = [
-            { time: "09:00", text: "Morning medication", featured: true, icon: "💊" },
-            { time: "13:00", text: "Afternoon medication", featured: true, icon: "💊" },
-            { time: "18:00", text: "Evening medication", featured: true, icon: "💊" },
-        ];
+            // ONE-TIME EVENTS (Specific dates)
+            // Format: { date: "YYYY-MM-DD", time: "HH:MM", text: "Event", featured: true/false, icon: "emoji" }
+            const SPECIFIC_DATE_EVENTS = [
+                // Example: { date: "2026-02-15", time: "14:30", text: "Doctor appointment", featured: true, icon: "🏥" },
+                // Example: { date: "2026-02-20", time: "10:00", text: "Call with insurance", featured: false, icon: "📞" },
+            ];
 
-        // WEEKLY REMINDERS (Specific day of week, pop-up only)
-        // Format: { dayOfWeek: 0-6, time: "HH:MM", text: "Reminder", featured: true, icon: "emoji" }
-        const WEEKLY_REMINDERS = [
-            // Example: { dayOfWeek: 2, time: "14:00", text: "Put out recycling bin", featured: true, icon: "♻️" },
-            // Example: { dayOfWeek: 1, time: "09:00", text: "Week planning time", featured: true, icon: "📋" },
-        ];
+            // RECURRING WEEKLY EVENTS (Same day/time every week)
+            // Format: { dayOfWeek: 0-6 (0=Sunday, 6=Saturday), time: "HH:MM", text: "Event", featured: true/false, icon: "emoji" }
+            const WEEKLY_EVENTS = [
+                {
+                    dayOfWeek: 0,
+                    time: "10:30",
+                    text: "Church service",
+                    featured: false,
+                    icon: "⛪",
+                },
+                // Example: { dayOfWeek: 3, time: "15:00", text: "Bridge club", featured: false, icon: "🎴" },
+                // Example: { dayOfWeek: 5, time: "11:00", text: "Hair appointment", featured: false, icon: "💇" },
+            ];
 
-        // HOURLY RECURRING REMINDERS (Throughout the day)
-        // Format: { interval: minutes, startTime: "HH:MM", endTime: "HH:MM", text: "Reminder", featured: true, icon: "emoji" }
-        const RECURRING_REMINDERS = [
-            { 
-                interval: 60, 
-                startTime: "11:00", 
-                endTime: "18:00", 
-                text: "Take a drink of water or other beverage", 
-                featured: true, 
-                icon: "💧" 
-            },
-            { 
-                interval: 90, 
-                startTime: "12:45", 
-                endTime: "17:45", 
-                text: "Move your arms and legs and stretch", 
-                featured: true, 
-                icon: "🤸" 
-            },
-        ];
+            // ==================================================
+            // REMINDERS - Only pop up, don't show in schedule
+            // ==================================================
 
-        // Time thresholds for day/night mode (24-hour format)
-        const DAY_START = 8;      // 8:00 AM
-        const EVENING_START = 18; // 6:00 PM
-        const NIGHT_START = 21;   // 9:00 PM
+            // DAILY REMINDERS (Every day at specific times)
+            // Format: { time: "HH:MM", text: "Reminder", featured: true, icon: "emoji" }
+            // Note: These do NOT appear in schedule, only as pop-ups
+            const DAILY_REMINDERS = [
+                {
+                    time: "09:00",
+                    text: "Morning medication",
+                    featured: true,
+                    icon: "💊",
+                },
+                {
+                    time: "13:00",
+                    text: "Afternoon medication",
+                    featured: true,
+                    icon: "💊",
+                },
+                {
+                    time: "18:00",
+                    text: "Evening medication",
+                    featured: true,
+                    icon: "💊",
+                },
+            ];
 
-        // Featured reminder display duration (minutes)
-        const FEATURED_DURATION = 3;
+            // WEEKLY REMINDERS (Specific day of week, pop-up only)
+            // Format: { dayOfWeek: 0-6, time: "HH:MM", text: "Reminder", featured: true, icon: "emoji" }
+            const WEEKLY_REMINDERS = [
+                // Example: { dayOfWeek: 2, time: "14:00", text: "Put out recycling bin", featured: true, icon: "♻️" },
+                // Example: { dayOfWeek: 1, time: "09:00", text: "Week planning time", featured: true, icon: "📋" },
+            ];
 
-        // ============================================
-        // END CONFIGURATION SECTION
-        // ============================================
+            // HOURLY RECURRING REMINDERS (Throughout the day)
+            // Format: { interval: minutes, startTime: "HH:MM", endTime: "HH:MM", text: "Reminder", featured: true, icon: "emoji" }
+            const RECURRING_REMINDERS = [
+                {
+                    interval: 60,
+                    startTime: "11:00",
+                    endTime: "18:00",
+                    text: "Take a drink of water or other beverage",
+                    featured: true,
+                    icon: "💧",
+                },
+                {
+                    interval: 90,
+                    startTime: "12:45",
+                    endTime: "17:45",
+                    text: "Move your arms and legs and stretch",
+                    featured: true,
+                    icon: "🤸",
+                },
+            ];
 
-        let allReminders = [];
-        let activeFeature = null;
-        let weatherUpdateInterval;
-        let lastRefreshCheck = Date.now();
-        let pageVersion = Date.now(); // Simple version tracking
+            // ==================================================
+            // SUGGESTIONS - Shows in "For Today" (max 3)
+            // ==================================================
 
-        // Generate simple chime sound
-        function generateChime() {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const duration = 0.3;
-            const fadeOut = 0.1;
-            
-            return new Promise((resolve) => {
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + duration);
-                
-                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-                
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + duration);
-                
-                setTimeout(resolve, duration * 1000);
-            });
-        }
+            // DAILY SUGGESTIONS (Show every day)
+            // Format: { text: "Suggestion text", icon: "emoji" }
+            const DAILY_SUGGESTIONS = [
+                { text: "Practice writing", icon: "✍️" },
+                // Example: { text: "Listen to music", icon: "🎵" },
+            ];
 
-        // Update day/night mode based on current time
-        function updateDayNightMode() {
-            const hour = new Date().getHours();
-            const body = document.body;
-            
-            body.classList.remove('day-mode', 'evening-mode', 'night-mode');
-            
-            if (hour >= DAY_START && hour < EVENING_START) {
-                body.classList.add('day-mode');
-            } else if (hour >= EVENING_START && hour < NIGHT_START) {
-                body.classList.add('evening-mode');
-            } else {
-                body.classList.add('night-mode');
-            }
-        }
+            // WEEKLY SUGGESTIONS (Specific days of week)
+            // Format: { dayOfWeek: 0-6, text: "Suggestion text", icon: "emoji" }
+            const WEEKLY_SUGGESTIONS = [
+                { dayOfWeek: 1, text: "Call a friend?", icon: "💬" },
+                { dayOfWeek: 4, text: "Call a friend?", icon: "💬" },
+                // Example: { dayOfWeek: 3, text: "Look at photo album", icon: "📷" },
+            ];
 
-        // Update time and date display
-        function updateTime() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit',
-                hour12: true 
-            });
-            const dateString = now.toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                month: 'long', 
-                day: 'numeric',
-                year: 'numeric'
-            });
-            
-            document.getElementById('time').textContent = timeString;
-            document.getElementById('date').textContent = dateString;
-            
-            updateDayNightMode();
-            checkReminders();
-            
-            // Update weather icon if we have weather data (switches between sun/moon)
-            if (window.currentWeatherCode !== undefined) {
-                const weatherInfo = getWeatherInfo(window.currentWeatherCode);
-                document.getElementById('weatherIcon').textContent = weatherInfo.icon;
-            }
-        }
+            // ONE-TIME SUGGESTIONS (Specific dates)
+            // Format: { date: "YYYY-MM-DD", text: "Suggestion text", icon: "emoji" }
+            const SPECIFIC_SUGGESTIONS = [
+                // Example: { date: "2026-02-14", text: "Call Sarah about birthday", icon: "📞" },
+            ];
 
-        // Fetch weather data
-        async function updateWeather() {
-            try {
-                // Using Open-Meteo free API (no key required)
-                // First, geocode the location
-                const geoResponse = await fetch(
-                    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(LOCATION)}&count=1&language=en&format=json`
-                );
-                const geoData = await geoResponse.json();
-                
-                if (geoData.results && geoData.results.length > 0) {
-                    const { latitude, longitude } = geoData.results[0];
-                    
-                    // Get weather data
-                    const weatherResponse = await fetch(
-                        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&temperature_unit=fahrenheit&timezone=auto`
+            // Time thresholds for day/night mode (24-hour format)
+            const DAY_START = 8; // 8:00 AM
+            const EVENING_START = 18; // 6:00 PM
+            const NIGHT_START = 21; // 9:00 PM
+
+            // Featured reminder display duration (minutes)
+            const FEATURED_DURATION = 3;
+
+            // ============================================
+            // END CONFIGURATION SECTION
+            // ============================================
+
+            let allReminders = [];
+            let activeFeature = null;
+            let weatherUpdateInterval;
+            let lastRefreshCheck = Date.now();
+            let pageVersion = Date.now(); // Simple version tracking
+
+            // Generate simple chime sound
+            function generateChime() {
+                const audioContext = new (
+                    window.AudioContext || window.webkitAudioContext
+                )();
+                const duration = 0.3;
+                const fadeOut = 0.1;
+
+                return new Promise((resolve) => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.setValueAtTime(
+                        800,
+                        audioContext.currentTime,
                     );
-                    const weatherData = await weatherResponse.json();
-                    
-                    const temp = Math.round(weatherData.current.temperature_2m);
-                    const weatherCode = weatherData.current.weather_code;
-                    
-                    document.getElementById('temperature').textContent = `${temp}°F`;
-                    
-                    // Map weather codes to icons and descriptions
-                    const weatherInfo = getWeatherInfo(weatherCode);
-                    document.getElementById('weatherIcon').textContent = weatherInfo.icon;
-                    document.getElementById('weatherDesc').textContent = weatherInfo.description;
-                    
-                    // Store the weather code so we can update the icon when time changes
-                    window.currentWeatherCode = weatherCode;
-                }
-            } catch (error) {
-                console.error('Weather fetch error:', error);
-                document.getElementById('weatherDesc').textContent = 'Weather unavailable';
-            }
-        }
+                    oscillator.frequency.exponentialRampToValueAtTime(
+                        400,
+                        audioContext.currentTime + duration,
+                    );
 
-        // Map weather codes to icons and descriptions
-        function getWeatherInfo(code) {
-            const hour = new Date().getHours();
-            const isNightTime = hour >= 20 || hour < 6; // 8 PM to 6 AM
-            
-            const weatherMap = {
-                0: { 
-                    icon: isNightTime ? '🌙' : '☀️', 
-                    description: 'Clear sky' 
-                },
-                1: { 
-                    icon: isNightTime ? '🌙' : '🌤️', 
-                    description: 'Mainly clear' 
-                },
-                2: { 
-                    icon: isNightTime ? '☁️' : '⛅', 
-                    description: 'Partly cloudy' 
-                },
-                3: { icon: '☁️', description: 'Overcast' },
-                45: { icon: '🌫️', description: 'Foggy' },
-                48: { icon: '🌫️', description: 'Foggy' },
-                51: { icon: '🌦️', description: 'Light drizzle' },
-                53: { icon: '🌦️', description: 'Drizzle' },
-                55: { icon: '🌧️', description: 'Heavy drizzle' },
-                61: { icon: '🌧️', description: 'Light rain' },
-                63: { icon: '🌧️', description: 'Rain' },
-                65: { icon: '🌧️', description: 'Heavy rain' },
-                71: { icon: '🌨️', description: 'Light snow' },
-                73: { icon: '🌨️', description: 'Snow' },
-                75: { icon: '🌨️', description: 'Heavy snow' },
-                77: { icon: '🌨️', description: 'Snow grains' },
-                80: { icon: '🌦️', description: 'Light showers' },
-                81: { icon: '🌧️', description: 'Showers' },
-                82: { icon: '🌧️', description: 'Heavy showers' },
-                85: { icon: '🌨️', description: 'Light snow showers' },
-                86: { icon: '🌨️', description: 'Snow showers' },
-                95: { icon: '⛈️', description: 'Thunderstorm' },
-                96: { icon: '⛈️', description: 'Thunderstorm with hail' },
-                99: { icon: '⛈️', description: 'Thunderstorm with hail' }
-            };
-            
-            return weatherMap[code] || { 
-                icon: isNightTime ? '🌙' : '🌤️', 
-                description: 'Unknown' 
-            };
-        }
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(
+                        0.01,
+                        audioContext.currentTime + duration,
+                    );
 
-        // Generate all reminders and events for today
-        function generateReminders() {
-            allReminders = [];
-            
-            const today = new Date();
-            const todayDayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
-            const todayDateString = today.toISOString().split('T')[0]; // YYYY-MM-DD
-            
-            // Add specific date events if they match today
-            SPECIFIC_DATE_EVENTS.forEach(event => {
-                if (event.date === todayDateString) {
-                    allReminders.push({
-                        time: event.time,
-                        text: event.text,
-                        featured: event.featured,
-                        icon: event.icon,
-                        schedule: true  // Shows in schedule list
-                    });
-                }
-            });
-            
-            // Add weekly recurring events if they match today's day of week
-            WEEKLY_EVENTS.forEach(event => {
-                if (event.dayOfWeek === todayDayOfWeek) {
-                    allReminders.push({
-                        time: event.time,
-                        text: event.text,
-                        featured: event.featured,
-                        icon: event.icon,
-                        schedule: true  // Shows in schedule list
-                    });
-                }
-            });
-            
-            // Add daily reminders (pop-up only, not in schedule)
-            DAILY_REMINDERS.forEach(reminder => {
-                allReminders.push({
-                    time: reminder.time,
-                    text: reminder.text,
-                    featured: reminder.featured,
-                    icon: reminder.icon,
-                    schedule: false  // Only pops up, doesn't show in schedule
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + duration);
+
+                    setTimeout(resolve, duration * 1000);
                 });
-            });
-            
-            // Add weekly reminders if they match today's day of week (pop-up only)
-            WEEKLY_REMINDERS.forEach(reminder => {
-                if (reminder.dayOfWeek === todayDayOfWeek) {
+            }
+
+            // Update day/night mode based on current time
+            function updateDayNightMode() {
+                const hour = new Date().getHours();
+                const body = document.body;
+
+                body.classList.remove("day-mode", "evening-mode", "night-mode");
+
+                if (hour >= DAY_START && hour < EVENING_START) {
+                    body.classList.add("day-mode");
+                } else if (hour >= EVENING_START && hour < NIGHT_START) {
+                    body.classList.add("evening-mode");
+                } else {
+                    body.classList.add("night-mode");
+                }
+            }
+
+            // Update time and date display
+            function updateTime() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString("en-US", {
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true,
+                });
+                const dateString = now.toLocaleDateString("en-US", {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                });
+
+                document.getElementById("time").textContent = timeString;
+                document.getElementById("date").textContent = dateString;
+
+                updateDayNightMode();
+                checkReminders();
+
+                // Update weather icon if we have weather data (switches between sun/moon)
+                if (window.currentWeatherCode !== undefined) {
+                    const weatherInfo = getWeatherInfo(
+                        window.currentWeatherCode,
+                    );
+                    document.getElementById("weatherIcon").textContent =
+                        weatherInfo.icon;
+                }
+            }
+
+            // Fetch weather data
+            async function updateWeather() {
+                try {
+                    // Using Open-Meteo free API (no key required)
+                    // First, geocode the location
+                    const geoResponse = await fetch(
+                        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(LOCATION)}&count=1&language=en&format=json`,
+                    );
+                    const geoData = await geoResponse.json();
+
+                    if (geoData.results && geoData.results.length > 0) {
+                        const { latitude, longitude } = geoData.results[0];
+
+                        // Get weather data
+                        const weatherResponse = await fetch(
+                            `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&temperature_unit=fahrenheit&timezone=auto`,
+                        );
+                        const weatherData = await weatherResponse.json();
+
+                        const temp = Math.round(
+                            weatherData.current.temperature_2m,
+                        );
+                        const weatherCode = weatherData.current.weather_code;
+
+                        document.getElementById("temperature").textContent =
+                            `${temp}°F`;
+
+                        // Map weather codes to icons and descriptions
+                        const weatherInfo = getWeatherInfo(weatherCode);
+                        document.getElementById("weatherIcon").textContent =
+                            weatherInfo.icon;
+                        document.getElementById("weatherDesc").textContent =
+                            weatherInfo.description;
+
+                        // Store the weather code so we can update the icon when time changes
+                        window.currentWeatherCode = weatherCode;
+                    }
+                } catch (error) {
+                    console.error("Weather fetch error:", error);
+                    document.getElementById("weatherDesc").textContent =
+                        "Weather unavailable";
+                }
+            }
+
+            // Map weather codes to icons and descriptions
+            function getWeatherInfo(code) {
+                const hour = new Date().getHours();
+                const isNightTime = hour >= 20 || hour < 6; // 8 PM to 6 AM
+
+                const weatherMap = {
+                    0: {
+                        icon: isNightTime ? "🌙" : "☀️",
+                        description: "Clear sky",
+                    },
+                    1: {
+                        icon: isNightTime ? "🌙" : "🌤️",
+                        description: "Mainly clear",
+                    },
+                    2: {
+                        icon: isNightTime ? "☁️" : "⛅",
+                        description: "Partly cloudy",
+                    },
+                    3: { icon: "☁️", description: "Overcast" },
+                    45: { icon: "🌫️", description: "Foggy" },
+                    48: { icon: "🌫️", description: "Foggy" },
+                    51: { icon: "🌦️", description: "Light drizzle" },
+                    53: { icon: "🌦️", description: "Drizzle" },
+                    55: { icon: "🌧️", description: "Heavy drizzle" },
+                    61: { icon: "🌧️", description: "Light rain" },
+                    63: { icon: "🌧️", description: "Rain" },
+                    65: { icon: "🌧️", description: "Heavy rain" },
+                    71: { icon: "🌨️", description: "Light snow" },
+                    73: { icon: "🌨️", description: "Snow" },
+                    75: { icon: "🌨️", description: "Heavy snow" },
+                    77: { icon: "🌨️", description: "Snow grains" },
+                    80: { icon: "🌦️", description: "Light showers" },
+                    81: { icon: "🌧️", description: "Showers" },
+                    82: { icon: "🌧️", description: "Heavy showers" },
+                    85: { icon: "🌨️", description: "Light snow showers" },
+                    86: { icon: "🌨️", description: "Snow showers" },
+                    95: { icon: "⛈️", description: "Thunderstorm" },
+                    96: { icon: "⛈️", description: "Thunderstorm with hail" },
+                    99: { icon: "⛈️", description: "Thunderstorm with hail" },
+                };
+
+                return (
+                    weatherMap[code] || {
+                        icon: isNightTime ? "🌙" : "🌤️",
+                        description: "Unknown",
+                    }
+                );
+            }
+
+            // Generate all reminders and events for today
+            function generateReminders() {
+                allReminders = [];
+
+                const today = new Date();
+                const todayDayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
+                const todayDateString = today.toISOString().split("T")[0]; // YYYY-MM-DD
+
+                // Add specific date events if they match today
+                SPECIFIC_DATE_EVENTS.forEach((event) => {
+                    if (event.date === todayDateString) {
+                        allReminders.push({
+                            time: event.time,
+                            text: event.text,
+                            featured: event.featured,
+                            icon: event.icon,
+                            schedule: true, // Shows in schedule list
+                        });
+                    }
+                });
+
+                // Add weekly recurring events if they match today's day of week
+                WEEKLY_EVENTS.forEach((event) => {
+                    if (event.dayOfWeek === todayDayOfWeek) {
+                        allReminders.push({
+                            time: event.time,
+                            text: event.text,
+                            featured: event.featured,
+                            icon: event.icon,
+                            schedule: true, // Shows in schedule list
+                        });
+                    }
+                });
+
+                // Add daily reminders (pop-up only, not in schedule)
+                DAILY_REMINDERS.forEach((reminder) => {
                     allReminders.push({
                         time: reminder.time,
                         text: reminder.text,
                         featured: reminder.featured,
                         icon: reminder.icon,
-                        schedule: false  // Only pops up, doesn't show in schedule
+                        schedule: false, // Only pops up, doesn't show in schedule
                     });
-                }
-            });
-            
-            // Add hourly recurring reminders (pop-up only, not in schedule)
-            RECURRING_REMINDERS.forEach(recurring => {
-                const startParts = recurring.startTime.split(':');
-                const endParts = recurring.endTime.split(':');
-                const startMinutes = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
-                const endMinutes = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
-                
-                for (let minutes = startMinutes; minutes <= endMinutes; minutes += recurring.interval) {
-                    const hours = Math.floor(minutes / 60);
-                    const mins = minutes % 60;
-                    const timeString = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
-                    
-                    allReminders.push({
-                        time: timeString,
-                        text: recurring.text,
-                        featured: recurring.featured,
-                        icon: recurring.icon,
-                        schedule: false  // Only pops up, doesn't show in schedule
-                    });
-                }
-            });
-            
-            // Sort by time
-            allReminders.sort((a, b) => a.time.localeCompare(b.time));
-            
-            displayReminders();
-        }
+                });
 
-        // Display schedule list (only items marked as schedule: true)
-        function displayReminders() {
-            const now = new Date();
-            const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-            
-            const remindersList = document.getElementById('remindersList');
-            remindersList.innerHTML = '';
-            
-            // Show only scheduled events (not recurring reminders)
-            const scheduleItems = allReminders.filter(r => r.schedule === true && r.time >= currentTime);
-            
-            if (scheduleItems.length === 0) {
-                remindersList.innerHTML = '<div class="reminder-item">No events scheduled for today</div>';
-                return;
+                // Add weekly reminders if they match today's day of week (pop-up only)
+                WEEKLY_REMINDERS.forEach((reminder) => {
+                    if (reminder.dayOfWeek === todayDayOfWeek) {
+                        allReminders.push({
+                            time: reminder.time,
+                            text: reminder.text,
+                            featured: reminder.featured,
+                            icon: reminder.icon,
+                            schedule: false, // Only pops up, doesn't show in schedule
+                        });
+                    }
+                });
+
+                // Add hourly recurring reminders (pop-up only, not in schedule)
+                RECURRING_REMINDERS.forEach((recurring) => {
+                    const startParts = recurring.startTime.split(":");
+                    const endParts = recurring.endTime.split(":");
+                    const startMinutes =
+                        parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
+                    const endMinutes =
+                        parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
+
+                    for (
+                        let minutes = startMinutes;
+                        minutes <= endMinutes;
+                        minutes += recurring.interval
+                    ) {
+                        const hours = Math.floor(minutes / 60);
+                        const mins = minutes % 60;
+                        const timeString = `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
+
+                        allReminders.push({
+                            time: timeString,
+                            text: recurring.text,
+                            featured: recurring.featured,
+                            icon: recurring.icon,
+                            schedule: false, // Only pops up, doesn't show in schedule
+                        });
+                    }
+                });
+
+                // Sort by time
+                allReminders.sort((a, b) => a.time.localeCompare(b.time));
+
+                displayCaregiver();
+                displayReminders();
+                displaySuggestions();
             }
-            
-            scheduleItems.forEach(reminder => {
-                const item = document.createElement('div');
-                item.className = 'reminder-item';
-                
-                const timeFormatted = formatTime12Hour(reminder.time);
-                item.innerHTML = `
+
+            // Display caregiver name
+            function displayCaregiver() {
+                const today = new Date();
+                const todayDayOfWeek = today.getDay();
+                const todayDateString = today.toISOString().split("T")[0];
+
+                let caregiverName = "";
+
+                // Check for substitute first (overrides weekly schedule)
+                const substitute = SUBSTITUTE_CAREGIVERS.find(
+                    (c) => c.date === todayDateString,
+                );
+                if (substitute) {
+                    caregiverName = substitute.name;
+                } else {
+                    // Use weekly schedule
+                    const weeklyCaregiver = WEEKLY_CAREGIVERS.find(
+                        (c) => c.dayOfWeek === todayDayOfWeek,
+                    );
+                    if (weeklyCaregiver) {
+                        caregiverName = weeklyCaregiver.name;
+                    }
+                }
+
+                const caregiverElement =
+                    document.getElementById("caregiverName");
+                if (caregiverName) {
+                    caregiverElement.textContent = `${caregiverName} is here today 💜`;
+                    caregiverElement.style.display = "block";
+                } else {
+                    caregiverElement.style.display = "none";
+                }
+            }
+
+            // Display schedule list (only items marked as schedule: true)
+            function displayReminders() {
+                const now = new Date();
+                const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+
+                const remindersList = document.getElementById("remindersList");
+                remindersList.innerHTML = "";
+
+                // Show only scheduled events (not recurring reminders)
+                const scheduleItems = allReminders.filter(
+                    (r) => r.schedule === true && r.time >= currentTime,
+                );
+
+                if (scheduleItems.length === 0) {
+                    remindersList.innerHTML =
+                        '<div class="reminder-item">No events scheduled for today</div>';
+                    return;
+                }
+
+                scheduleItems.forEach((reminder) => {
+                    const item = document.createElement("div");
+                    item.className = "reminder-item";
+
+                    const timeFormatted = formatTime12Hour(reminder.time);
+                    item.innerHTML = `
                     <span class="reminder-time">${reminder.icon} ${timeFormatted}</span>
                     <span class="reminder-text">${reminder.text}</span>
                 `;
-                
-                remindersList.appendChild(item);
-            });
-        }
 
-        // Format time to 12-hour format
-        function formatTime12Hour(time24) {
-            const [hours, minutes] = time24.split(':');
-            const hour = parseInt(hours);
-            const ampm = hour >= 12 ? 'PM' : 'AM';
-            const hour12 = hour % 12 || 12;
-            return `${hour12}:${minutes} ${ampm}`;
-        }
-
-        // Check if any reminders should be featured now
-        function checkReminders() {
-            const now = new Date();
-            const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-            
-            // If already showing a featured reminder, don't interrupt
-            if (activeFeature) return;
-            
-            // Find reminders that should be featured now
-            const featuredReminder = allReminders.find(r => 
-                r.time === currentTime && r.featured
-            );
-            
-            if (featuredReminder) {
-                showFeaturedReminder(featuredReminder);
+                    remindersList.appendChild(item);
+                });
             }
-        }
 
-        // Show featured reminder overlay
-        async function showFeaturedReminder(reminder) {
-            activeFeature = reminder;
-            
-            const overlay = document.getElementById('featuredOverlay');
-            document.getElementById('featuredIcon').textContent = reminder.icon;
-            document.getElementById('featuredTime').textContent = formatTime12Hour(reminder.time);
-            document.getElementById('featuredText').textContent = reminder.text;
-            
-            overlay.classList.add('active');
-            
-            // Play chime
-            await generateChime();
-            
-            // Hide after specified duration
-            setTimeout(() => {
-                overlay.classList.remove('active');
-                activeFeature = null;
-                displayReminders(); // Refresh the list
-            }, FEATURED_DURATION * 60 * 1000);
-        }
+            // Display suggestions list (max 3)
+            function displaySuggestions() {
+                const today = new Date();
+                const todayDayOfWeek = today.getDay();
+                const todayDateString = today.toISOString().split("T")[0];
 
-        // Smart auto-refresh system
-        function checkForRefresh() {
-            const now = new Date();
-            const currentHour = now.getHours();
-            const currentMinute = now.getMinutes();
-            
-            // Refresh at midnight (for daily schedule regeneration)
-            if (currentHour === 0 && currentMinute === 0 && !activeFeature) {
-                console.log('Midnight refresh - regenerating daily schedule');
-                location.reload();
-                return;
-            }
-            
-            // During waking hours (8 AM - 10 PM), check for updates every 15 minutes
-            const isWakingHours = currentHour >= 8 && currentHour < 22;
-            const timeSinceLastCheck = Date.now() - lastRefreshCheck;
-            const fifteenMinutes = 15 * 60 * 1000;
-            
-            if (isWakingHours && timeSinceLastCheck >= fifteenMinutes) {
-                // Don't refresh if a featured reminder is currently showing
-                if (activeFeature) {
-                    console.log('Skipping refresh - featured reminder active');
-                    lastRefreshCheck = Date.now(); // Reset timer but don't refresh
+                const suggestionsList =
+                    document.getElementById("suggestionsList");
+                suggestionsList.innerHTML = "";
+
+                let allSuggestions = [];
+
+                // Add specific date suggestions
+                SPECIFIC_SUGGESTIONS.forEach((suggestion) => {
+                    if (suggestion.date === todayDateString) {
+                        allSuggestions.push({
+                            text: suggestion.text,
+                            icon: suggestion.icon,
+                        });
+                    }
+                });
+
+                // Add daily suggestions
+                DAILY_SUGGESTIONS.forEach((suggestion) => {
+                    allSuggestions.push({
+                        text: suggestion.text,
+                        icon: suggestion.icon,
+                    });
+                });
+
+                // Add weekly suggestions if they match today
+                WEEKLY_SUGGESTIONS.forEach((suggestion) => {
+                    if (suggestion.dayOfWeek === todayDayOfWeek) {
+                        allSuggestions.push({
+                            text: suggestion.text,
+                            icon: suggestion.icon,
+                        });
+                    }
+                });
+
+                // Limit to 3 suggestions (user controls order in config)
+                const displaySuggestions = allSuggestions.slice(0, 3);
+
+                if (displaySuggestions.length === 0) {
+                    suggestionsList.innerHTML =
+                        '<div class="reminder-item">Enjoy your day</div>';
                     return;
                 }
-                
-                // Simple refresh during waking hours
-                console.log('Waking hours refresh - checking for updates');
-                lastRefreshCheck = Date.now();
-                location.reload();
+
+                displaySuggestions.forEach((suggestion) => {
+                    const item = document.createElement("div");
+                    item.className = "reminder-item";
+                    item.innerHTML = `
+                    <span class="reminder-text">${suggestion.icon} ${suggestion.text}</span>
+                `;
+                    suggestionsList.appendChild(item);
+                });
             }
-        }
-        
-        // Update location (can be called from console)
-        function updateLocation(newLocation) {
-            LOCATION = newLocation;
-            updateWeather();
-            console.log(`Location updated to: ${newLocation}`);
-        }
 
-        // Initialize
-        function init() {
-            updateTime();
-            updateWeather();
-            generateReminders();
-            
-            // Update time every second
-            setInterval(updateTime, 1000);
-            
-            // Check for refresh needs every minute
-            setInterval(checkForRefresh, 60 * 1000);
-            
-            // Update weather every 30 minutes
-            weatherUpdateInterval = setInterval(updateWeather, 30 * 60 * 1000);
-            
-            // Regenerate reminders at midnight
-            setInterval(() => {
+            // Format time to 12-hour format
+            function formatTime12Hour(time24) {
+                const [hours, minutes] = time24.split(":");
+                const hour = parseInt(hours);
+                const ampm = hour >= 12 ? "PM" : "AM";
+                const hour12 = hour % 12 || 12;
+                return `${hour12}:${minutes} ${ampm}`;
+            }
+
+            // Check if any reminders should be featured now
+            function checkReminders() {
                 const now = new Date();
-                if (now.getHours() === 0 && now.getMinutes() === 0) {
-                    generateReminders();
-                }
-            }, 60 * 1000);
-            
-            console.log('Memory Display initialized');
-            console.log('Auto-refresh: Every 15 min (8 AM - 10 PM), midnight daily');
-            console.log('To update location, use: updateLocation("New Location")');
-        }
+                const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
 
-        // Start when page loads
-        window.addEventListener('load', init);
-    </script>
-</body>
+                // If already showing a featured reminder, don't interrupt
+                if (activeFeature) return;
+
+                // Find reminders that should be featured now
+                const featuredReminder = allReminders.find(
+                    (r) => r.time === currentTime && r.featured,
+                );
+
+                if (featuredReminder) {
+                    showFeaturedReminder(featuredReminder);
+                }
+            }
+
+            // Show featured reminder overlay
+            async function showFeaturedReminder(reminder) {
+                activeFeature = reminder;
+
+                const overlay = document.getElementById("featuredOverlay");
+                document.getElementById("featuredIcon").textContent =
+                    reminder.icon;
+                document.getElementById("featuredTime").textContent =
+                    formatTime12Hour(reminder.time);
+                document.getElementById("featuredText").textContent =
+                    reminder.text;
+
+                overlay.classList.add("active");
+
+                // Play chime
+                await generateChime();
+
+                // Hide after specified duration
+                setTimeout(
+                    () => {
+                        overlay.classList.remove("active");
+                        activeFeature = null;
+                        displayReminders(); // Refresh the list
+                    },
+                    FEATURED_DURATION * 60 * 1000,
+                );
+            }
+
+            // Smart auto-refresh system
+            function checkForRefresh() {
+                const now = new Date();
+                const currentHour = now.getHours();
+                const currentMinute = now.getMinutes();
+
+                // Refresh at midnight (for daily schedule regeneration)
+                if (
+                    currentHour === 0 &&
+                    currentMinute === 0 &&
+                    !activeFeature
+                ) {
+                    console.log(
+                        "Midnight refresh - regenerating daily schedule",
+                    );
+                    location.reload();
+                    return;
+                }
+
+                // During waking hours (8 AM - 10 PM), check for updates every 15 minutes
+                const isWakingHours = currentHour >= 8 && currentHour < 22;
+                const timeSinceLastCheck = Date.now() - lastRefreshCheck;
+                const fifteenMinutes = 15 * 60 * 1000;
+
+                if (isWakingHours && timeSinceLastCheck >= fifteenMinutes) {
+                    // Don't refresh if a featured reminder is currently showing
+                    if (activeFeature) {
+                        console.log(
+                            "Skipping refresh - featured reminder active",
+                        );
+                        lastRefreshCheck = Date.now(); // Reset timer but don't refresh
+                        return;
+                    }
+
+                    // Simple refresh during waking hours
+                    console.log("Waking hours refresh - checking for updates");
+                    lastRefreshCheck = Date.now();
+                    location.reload();
+                }
+            }
+
+            // Update location (can be called from console)
+            function updateLocation(newLocation) {
+                LOCATION = newLocation;
+                updateWeather();
+                console.log(`Location updated to: ${newLocation}`);
+            }
+
+            // Initialize
+            function init() {
+                updateTime();
+                updateWeather();
+                generateReminders();
+
+                // Update time every second
+                setInterval(updateTime, 1000);
+
+                // Check for refresh needs every minute
+                setInterval(checkForRefresh, 60 * 1000);
+
+                // Update weather every 30 minutes
+                weatherUpdateInterval = setInterval(
+                    updateWeather,
+                    30 * 60 * 1000,
+                );
+
+                // Regenerate reminders at midnight
+                setInterval(() => {
+                    const now = new Date();
+                    if (now.getHours() === 0 && now.getMinutes() === 0) {
+                        generateReminders();
+                    }
+                }, 60 * 1000);
+
+                console.log("Memory Display initialized");
+                console.log(
+                    "Auto-refresh: Every 15 min (8 AM - 10 PM), midnight daily",
+                );
+                console.log(
+                    'To update location, use: updateLocation("New Location")',
+                );
+            }
+
+            // Start when page loads
+            window.addEventListener("load", init);
+        </script>
+    </body>
 </html>
