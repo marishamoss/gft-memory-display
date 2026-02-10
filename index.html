@@ -372,6 +372,26 @@
             // Example: { date: "2026-02-15", name: "Maria" },
         ];
 
+        // NIGHT SHIFT CAREGIVERS (7:00 PM - 6:59 AM)
+        // Format: { dayOfWeek: 0-6, name: "Name" }
+        // Note: dayOfWeek refers to the day when night shift STARTS (at 7 PM)
+        const NIGHT_CAREGIVERS = [
+            { dayOfWeek: 0, name: "Marisha" },  // Sunday night
+            { dayOfWeek: 1, name: "Marisha" },  // Monday night
+            { dayOfWeek: 2, name: "Marisha" },  // Tuesday night
+            { dayOfWeek: 3, name: "Marisha" },  // Wednesday night
+            { dayOfWeek: 4, name: "Marisha" },  // Thursday night
+            { dayOfWeek: 5, name: "Marisha" },  // Friday night
+            { dayOfWeek: 6, name: "Marisha" },  // Saturday night
+        ];
+        
+        // SUBSTITUTE NIGHT CAREGIVERS (Specific dates override weekly night schedule)
+        // Format: { date: "YYYY-MM-DD", name: "Name" }
+        // Note: date refers to the day when night shift STARTS (at 7 PM)
+        const SUBSTITUTE_NIGHT_CAREGIVERS = [
+            // Example: { date: "2026-02-15", name: "Sarah" },  // Sarah covers the night of Feb 15
+        ];
+
         // ==================================================
         // SCHEDULED EVENTS - Shows in "Today's Schedule"
         // ==================================================
@@ -721,30 +741,71 @@
 
         // Display caregiver name
         function displayCaregiver() {
-            const today = new Date();
-            const todayDayOfWeek = today.getDay();
-            const todayDateString = today.toISOString().split('T')[0];
+            const now = new Date();
+            const currentHour = now.getHours();
+            const todayDayOfWeek = now.getDay();
+            const todayDateString = now.toISOString().split('T')[0];
             
             let caregiverName = "";
+            let isNightShift = currentHour >= 19 || currentHour < 7; // 7 PM to 6:59 AM
             
-            // Check for substitute first (overrides weekly schedule)
-            const substitute = SUBSTITUTE_CAREGIVERS.find(c => c.date === todayDateString);
-            if (substitute) {
-                caregiverName = substitute.name;
-            } else {
-                // Use weekly schedule
-                const weeklyCaregiver = WEEKLY_CAREGIVERS.find(c => c.dayOfWeek === todayDayOfWeek);
-                if (weeklyCaregiver) {
-                    caregiverName = weeklyCaregiver.name;
+            if (isNightShift) {
+                // Night shift (7 PM - 6:59 AM)
+                // For hours 0-6 (midnight to 6:59 AM), use YESTERDAY's night shift
+                let nightShiftDay = todayDayOfWeek;
+                let nightShiftDate = todayDateString;
+                
+                if (currentHour < 7) {
+                    // It's early morning (midnight-6:59 AM), so use yesterday's night shift
+                    const yesterday = new Date(now);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    nightShiftDay = yesterday.getDay();
+                    nightShiftDate = yesterday.toISOString().split('T')[0];
                 }
-            }
-            
-            const caregiverElement = document.getElementById('caregiverName');
-            if (caregiverName) {
-                caregiverElement.textContent = `${caregiverName} is here today 💜`;
-                caregiverElement.style.display = 'block';
+                
+                // Check for substitute night caregiver first
+                const substituteNight = SUBSTITUTE_NIGHT_CAREGIVERS.find(c => c.date === nightShiftDate);
+                if (substituteNight) {
+                    caregiverName = substituteNight.name;
+                } else {
+                    // Use weekly night schedule
+                    const nightCaregiver = NIGHT_CAREGIVERS.find(c => c.dayOfWeek === nightShiftDay);
+                    if (nightCaregiver) {
+                        caregiverName = nightCaregiver.name;
+                    }
+                }
+                
+                // Display with "tonight" wording
+                const caregiverElement = document.getElementById('caregiverName');
+                if (caregiverName) {
+                    caregiverElement.textContent = `${caregiverName} is here tonight 💜`;
+                    caregiverElement.style.display = 'block';
+                } else {
+                    caregiverElement.style.display = 'none';
+                }
+                
             } else {
-                caregiverElement.style.display = 'none';
+                // Day shift (7 AM - 6:59 PM)
+                // Check for substitute first (overrides weekly schedule)
+                const substitute = SUBSTITUTE_CAREGIVERS.find(c => c.date === todayDateString);
+                if (substitute) {
+                    caregiverName = substitute.name;
+                } else {
+                    // Use weekly schedule
+                    const weeklyCaregiver = WEEKLY_CAREGIVERS.find(c => c.dayOfWeek === todayDayOfWeek);
+                    if (weeklyCaregiver) {
+                        caregiverName = weeklyCaregiver.name;
+                    }
+                }
+                
+                // Display with "today" wording
+                const caregiverElement = document.getElementById('caregiverName');
+                if (caregiverName) {
+                    caregiverElement.textContent = `${caregiverName} is here today 💜`;
+                    caregiverElement.style.display = 'block';
+                } else {
+                    caregiverElement.style.display = 'none';
+                }
             }
         }
 
@@ -895,65 +956,4 @@
                 console.log('Midnight refresh - regenerating daily schedule');
                 location.reload();
                 return;
-            }
-            
-            // During waking hours (8 AM - 10 PM), check for updates every 15 minutes
-            const isWakingHours = currentHour >= 8 && currentHour < 22;
-            const timeSinceLastCheck = Date.now() - lastRefreshCheck;
-            const fifteenMinutes = 15 * 60 * 1000;
-            
-            if (isWakingHours && timeSinceLastCheck >= fifteenMinutes) {
-                // Don't refresh if a featured reminder is currently showing
-                if (activeFeature) {
-                    console.log('Skipping refresh - featured reminder active');
-                    lastRefreshCheck = Date.now(); // Reset timer but don't refresh
-                    return;
-                }
-                
-                // Simple refresh during waking hours
-                console.log('Waking hours refresh - checking for updates');
-                lastRefreshCheck = Date.now();
-                location.reload();
-            }
-        }
-        
-        // Update location (can be called from console)
-        function updateLocation(newLocation) {
-            LOCATION = newLocation;
-            updateWeather();
-            console.log(`Location updated to: ${newLocation}`);
-        }
-
-        // Initialize
-        function init() {
-            updateTime();
-            updateWeather();
-            generateReminders();
-            
-            // Update time every second
-            setInterval(updateTime, 1000);
-            
-            // Check for refresh needs every minute
-            setInterval(checkForRefresh, 60 * 1000);
-            
-            // Update weather every 30 minutes
-            weatherUpdateInterval = setInterval(updateWeather, 30 * 60 * 1000);
-            
-            // Regenerate reminders at midnight
-            setInterval(() => {
-                const now = new Date();
-                if (now.getHours() === 0 && now.getMinutes() === 0) {
-                    generateReminders();
-                }
-            }, 60 * 1000);
-            
-            console.log('Memory Display initialized');
-            console.log('Auto-refresh: Every 15 min (8 AM - 10 PM), midnight daily');
-            console.log('To update location, use: updateLocation("New Location")');
-        }
-
-        // Start when page loads
-        window.addEventListener('load', init);
-    </script>
-</body>
-</html>
+       
