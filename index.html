@@ -419,7 +419,7 @@
             const SPECIFIC_DATE_EVENTS = [
                   { date: "2026-02-20", time: "13:40", text: "CRA Ultrasound appointment", featured: true, icon: "🩻" },
                   { date: "2026-02-22", time: "11:30", text: "Visit with Tapera clan", featured: true, icon: "🧑‍🧑‍🧒‍🧒" },
-            
+
                 // Example: { date: "2026-02-15", time: "14:30", text: "Doctor appointment", featured: true, icon: "🏥" },
                 // Example: { date: "2026-02-20", time: "10:00", text: "Call with insurance", featured: false, icon: "📞" },
                // { date: "2026-02-19", time: "10:30", text: "Telehealth meeting with Roberta", featured: true, icon: "💬" },
@@ -668,6 +668,194 @@
             // ============================================
             // END CONFIGURATION SECTION
             // ============================================
+
+            // Calculate Easter Sunday for a given year using Computus algorithm
+            function calculateEaster(year) {
+                const a = year % 19;
+                const b = Math.floor(year / 100);
+                const c = year % 100;
+                const d = Math.floor(b / 4);
+                const e = b % 4;
+                const f = Math.floor((b + 8) / 25);
+                const g = Math.floor((b - f + 1) / 3);
+                const h = (19 * a + b - d - g + 15) % 30;
+                const i = Math.floor(c / 4);
+                const k = c % 4;
+                const l = (32 + 2 * e + 2 * i - h - k) % 7;
+                const m = Math.floor((a + 11 * h + 22 * l) / 451);
+                const month = Math.floor((h + l - 7 * m + 114) / 31);
+                const day = ((h + l - 7 * m + 114) % 31) + 1;
+                return new Date(year, month - 1, day);
+            }
+
+            // Generate liturgical holidays for a given year
+            function generateLiturgicalHolidays(year) {
+                const easter = calculateEaster(year);
+                const liturgical = [];
+
+                // Ash Wednesday (46 days before Easter)
+                const ashWednesday = new Date(easter);
+                ashWednesday.setDate(easter.getDate() - 46);
+                liturgical.push({
+                    month: ashWednesday.getMonth() + 1,
+                    day: ashWednesday.getDate(),
+                    text: "Ash Wednesday",
+                    emoji: "✝️",
+                    color: "#9370DB"
+                });
+
+                // Transfiguration (7 days before Ash Wednesday = Last Sunday before Lent)
+                const transfiguration = new Date(ashWednesday);
+                transfiguration.setDate(ashWednesday.getDate() - 4); // Back to Sunday before Ash Wed
+                liturgical.push({
+                    month: transfiguration.getMonth() + 1,
+                    day: transfiguration.getDate(),
+                    text: "Transfiguration Sunday",
+                    emoji: "✨",
+                    color: "#F0E68C"
+                });
+
+                // Palm Sunday (7 days before Easter)
+                const palmSunday = new Date(easter);
+                palmSunday.setDate(easter.getDate() - 7);
+                liturgical.push({
+                    month: palmSunday.getMonth() + 1,
+                    day: palmSunday.getDate(),
+                    text: "Palm Sunday",
+                    emoji: "🌿",
+                    color: "#32CD32"
+                });
+
+                // Maundy Thursday (3 days before Easter)
+                const maundyThursday = new Date(easter);
+                maundyThursday.setDate(easter.getDate() - 3);
+                liturgical.push({
+                    month: maundyThursday.getMonth() + 1,
+                    day: maundyThursday.getDate(),
+                    text: "Maundy Thursday",
+                    emoji: "🍞",
+                    color: "#CD853F"
+                });
+
+                // Good Friday (2 days before Easter)
+                const goodFriday = new Date(easter);
+                goodFriday.setDate(easter.getDate() - 2);
+                liturgical.push({
+                    month: goodFriday.getMonth() + 1,
+                    day: goodFriday.getDate(),
+                    text: "Good Friday",
+                    emoji: "✝️",
+                    color: "#B22222"
+                });
+
+                // Holy Saturday (1 day before Easter)
+                const holySaturday = new Date(easter);
+                holySaturday.setDate(easter.getDate() - 1);
+                liturgical.push({
+                    month: holySaturday.getMonth() + 1,
+                    day: holySaturday.getDate(),
+                    text: "Holy Saturday",
+                    emoji: "🕯️",
+                    color: "#A9A9A9"
+                });
+
+                // Easter Sunday
+                liturgical.push({
+                    month: easter.getMonth() + 1,
+                    day: easter.getDate(),
+                    text: "Christ is Risen! Happy Easter!",
+                    emoji: "✝️",
+                    color: "#FFD700"
+                });
+
+                // Ascension Day (40 days after Easter, always Thursday)
+                const ascension = new Date(easter);
+                ascension.setDate(easter.getDate() + 39); // 39 days after to get to Thursday
+                liturgical.push({
+                    month: ascension.getMonth() + 1,
+                    day: ascension.getDate(),
+                    text: "Ascension Day",
+                    emoji: "☁️",
+                    color: "#87CEEB"
+                });
+
+                // Pentecost Sunday (50 days after Easter)
+                const pentecost = new Date(easter);
+                pentecost.setDate(easter.getDate() + 49);
+                liturgical.push({
+                    month: pentecost.getMonth() + 1,
+                    day: pentecost.getDate(),
+                    text: "Pentecost Sunday",
+                    emoji: "🔥",
+                    color: "#DC143C"
+                });
+
+                // Trinity Sunday (7 days after Pentecost)
+                const trinity = new Date(pentecost);
+                trinity.setDate(pentecost.getDate() + 7);
+                liturgical.push({
+                    month: trinity.getMonth() + 1,
+                    day: trinity.getDate(),
+                    text: "Trinity Sunday",
+                    emoji: "✨",
+                    color: "#FFD700"
+                });
+
+                // First Sunday of Advent (4 Sundays before Christmas)
+                const christmas = new Date(year, 11, 25); // Dec 25
+                const christmasDayOfWeek = christmas.getDay();
+                const daysUntilSunday = christmasDayOfWeek === 0 ? 0 : 7 - christmasDayOfWeek;
+                const sundayBeforeChristmas = new Date(christmas);
+                sundayBeforeChristmas.setDate(christmas.getDate() - christmasDayOfWeek);
+                
+                const firstAdvent = new Date(sundayBeforeChristmas);
+                firstAdvent.setDate(sundayBeforeChristmas.getDate() - 21); // 3 weeks before
+                liturgical.push({
+                    month: firstAdvent.getMonth() + 1,
+                    day: firstAdvent.getDate(),
+                    text: "First Sunday of Advent",
+                    emoji: "🕯️",
+                    color: "#9370DB"
+                });
+
+                // Christmas Eve
+                liturgical.push({
+                    month: 12,
+                    day: 24,
+                    text: "Christmas Eve",
+                    emoji: "⭐",
+                    color: "#FFD700"
+                });
+
+                // All Saints' Day (fixed date)
+                liturgical.push({
+                    month: 11,
+                    day: 1,
+                    text: "All Saints' Day",
+                    emoji: "✨",
+                    color: "#FFD700"
+                });
+
+                // Epiphany (fixed date, but might be in next year)
+                if (year > new Date().getFullYear()) {
+                    liturgical.push({
+                        month: 1,
+                        day: 6,
+                        text: "Epiphany",
+                        emoji: "⭐",
+                        color: "#FFD700"
+                    });
+                }
+
+                return liturgical;
+            }
+
+            // Combine secular and liturgical holidays
+            const currentYear = new Date().getFullYear();
+            const nextYear = currentYear + 1;
+            const liturgicalHolidays2026 = generateLiturgicalHolidays(currentYear);
+            const liturgicalHolidays2027 = generateLiturgicalHolidays(nextYear);
+            const ALL_HOLIDAYS = [...HOLIDAYS, ...liturgicalHolidays2026, ...liturgicalHolidays2027];
 
             let allReminders = [];
             let activeFeature = null;
@@ -1084,7 +1272,7 @@
                 let allSuggestions = [];
 
                 // Check for holidays first (highest priority)
-                const todayHoliday = HOLIDAYS.find(
+                const todayHoliday = ALL_HOLIDAYS.find(
                     (h) => h.month === todayMonth && h.day === todayDay,
                 );
                 if (todayHoliday) {
