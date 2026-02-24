@@ -421,7 +421,7 @@
                   { date: "2026-02-20", time: "13:40", text: "CRA Ultrasound appointment", featured: true, icon: "🩻" },
                   { date: "2026-02-22", time: "11:30", text: "Visit with Tapera clan", featured: true, icon: "🧑‍🧑‍🧒‍🧒" },   
                   { date: "2026-02-21", time: "12:30", text: "Hair wash with Dionne", featured: false, icon: "💆🏾‍♀️" },
-
+{ date: "2026-02-24", time: "11:00", text: "PT Eval with Gracia", featured: false, icon: "🏋🏾‍♂️" },
                 // Example: { date: "2026-02-15", time: "14:30", text: "Doctor appointment", featured: true, icon: "🏥" },
                 // Example: { date: "2026-02-20", time: "10:00", text: "Call with insurance", featured: false, icon: "📞" },
                // { date: "2026-02-19", time: "10:30", text: "Telehealth meeting with Roberta", featured: true, icon: "💬" },
@@ -1236,9 +1236,9 @@
                 remindersList.innerHTML = "";
 
                 // Show only scheduled events (not recurring reminders)
-                const scheduleItems = allReminders.filter(
-                    (r) => r.schedule === true && r.time >= currentTime,
-                );
+               const scheduleItems = allReminders.filter(
+    (r) => r.schedule === true
+);
 
                 if (scheduleItems.length === 0) {
                     remindersList.innerHTML =
