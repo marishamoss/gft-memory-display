@@ -556,6 +556,7 @@
             }
 
             function generateReminders() {
+                console.log("generateReminders called at:", new Date().toLocaleTimeString());
                 allReminders = [];
                 const today = new Date();
                 const todayDayOfWeek = today.getDay();
