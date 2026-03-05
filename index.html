@@ -562,7 +562,10 @@
                 allReminders = [];
                 const today = new Date();
                 const todayDayOfWeek = today.getDay();
-                const todayDateString = today.toISOString().split("T")[0];
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                const todayDateString = `${year}-${month}-${day}`;
                 console.log("Today's date string:", todayDateString);
                 
                 SPECIFIC_DATE_EVENTS.forEach((event) => {
