@@ -563,7 +563,8 @@
                 const today = new Date();
                 const todayDayOfWeek = today.getDay();
                 const todayDateString = today.toISOString().split("T")[0];
-
+                console.log("Today's date string:", todayDateString);
+                
                 SPECIFIC_DATE_EVENTS.forEach((event) => {
                     if (event.date === todayDateString) {
                         allReminders.push({ time: event.time, text: event.text, featured: event.featured, icon: event.icon, schedule: true });
