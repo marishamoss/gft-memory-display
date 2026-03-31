@@ -310,9 +310,10 @@ body.night-mode #cfg-btn{color:rgba(120,120,120,0.3);opacity:.2;}
   </div>
   <div class="cs"><div class="cst">Care team</div>
     <div class="sc-row">
-      <label for="sc-chk">I care for myself / no care team</label>
+      <label for="sc-chk">Show default greeting when no one is scheduled</label>
       <label class="sc-toggle"><input type="checkbox" id="sc-chk" onchange="toggleSelfCare()"/><span class="sc-slider"></span></label>
     </div>
+    <div style="font-size:10px;color:#7A9BAD;margin-bottom:10px;line-height:1.5;">When on, shows "Take good care of yourself" during any unscheduled time. When off, shows no caregiver message.</div>
     <div id="care-team-fields">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:6px;">
         <div class="cf" style="margin:0;"><label>Person 1</label><input id="pt0" type="text" oninput="updSD()"/></div>
@@ -323,8 +324,8 @@ body.night-mode #cfg-btn{color:rgba(120,120,120,0.3);opacity:.2;}
       <div style="font-size:10px;color:#7A9BAD;margin-bottom:10px;">Leave unused slots blank.</div>
     </div>
   </div>
-  <div class="cs" id="sched-section"><div class="cst">Care Team Schedule</div>
-    <div style="font-size:10px;color:#7A9BAD;margin-bottom:8px;line-height:1.5;">Set up to two time blocks per day. Leave start time empty to skip a block. Leave end time empty and it runs to midnight.</div>
+  <div class="cs" id="sched-section"><div class="cst">Weekly schedule</div>
+    <div style="font-size:10px;color:#7A9BAD;margin-bottom:8px;line-height:1.5;">This repeats every week. Set up to two time blocks per day. Leave start empty to skip a block. Leave end empty and it runs to midnight. For one-time visits, use Events below.</div>
     <div id="p-sched"></div>
   </div>
   <div class="cs"><div class="cst">Medication reminders</div>
@@ -564,9 +565,8 @@ function toggleSelfCare(){
   if(!chk)return;
   C.selfCare=chk.checked;
   var fields=document.getElementById('care-team-fields');
-  var sched=document.getElementById('sched-section');
   if(fields)fields.style.display=chk.checked?'none':'block';
-  if(sched)sched.style.display=chk.checked?'none':'block';
+  // Schedule always stays visible so caregivers can verify what's set up
 }
 
 function pop(){
@@ -698,6 +698,7 @@ function toggleSelfCareConfig(){
   data.selfCare=chk.checked;
   const fields=document.getElementById('fsc-fields');
   if(fields)fields.style.display=chk.checked?'none':'block';
+  // Schedule block always stays visible
 }
 
 function render(){
@@ -752,18 +753,19 @@ function render(){
 
     c=`<div class="slabel">Step 3 of ${TOTAL}</div>
     <div class="stitle">Care team</div>
-    <div class="sdesc">Enter up to four caregivers, then set their time blocks for each day. Up to two blocks per day. Leave end time empty and the block runs to midnight.</div>
+    <div class="sdesc">Enter up to four caregivers and set their recurring weekly time blocks. For one-time visits, use Events in the next step.</div>
     <div class="toggle-row">
       <label class="toggle"><input type="checkbox" id="fsc" ${data.selfCare?'checked':''} onchange="toggleSelfCareConfig()"/><span class="toggle-slider"></span></label>
-      <label for="fsc">I care for myself / no care team</label>
+      <label for="fsc">Show default greeting when no one is scheduled</label>
     </div>
     <div id="fsc-fields" style="display:${data.selfCare?'none':'block'};">
       <div class="subsec">Team members</div>
       <div class="g2">${[0,1,2,3].map(i=>`<div class="field" style="margin-bottom:10px;"><label>Person ${i+1}</label><input type="text" id="ft${i}" value="${ea(data.team[i]||'')}" placeholder="Caregiver name" oninput="updateConfigDropdowns()"/></div>`).join('')}</div>
       <div class="hint" style="margin-bottom:14px;">Leave unused slots blank.</div>
-      <div class="subsec">Daily schedule</div>
-      ${schedBlocks}
-    </div>`;
+    </div>
+    <div class="subsec">Weekly schedule <span style="font-weight:400;font-family:'Quicksand',sans-serif;font-size:10px;color:var(--soft);text-transform:none;letter-spacing:0;">— repeats every week</span></div>
+    <div style="font-size:11px;color:var(--soft);margin-bottom:10px;line-height:1.6;">Set up to two time blocks per day. Leave start empty to skip. Leave end empty and it runs to midnight.</div>
+    ${schedBlocks}`;
   }
 
   if(step===4){
