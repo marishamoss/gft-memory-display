@@ -1,147 +1,241 @@
-# MemoryLUV
-### A LUVWORKS product by RMS Omnimedia
-
-**A personalized orientation display for people living with memory challenges, cognitive change, or extended recovery — built by a family caregiver, for families like yours.**
+# Memory Display - Version 6.3 README
+## Release Date: February 19, 2026
 
 ---
 
-## What it does
+## What's New in Version 6.3
 
-MemoryLUV is a self-updating digital display designed for the *person being cared for* — not just the caregiver. It runs in any browser on any screen and gives your loved one something most caregiving tools forget: a way to know what's happening in their day without having to ask.
+### Major Features Added:
+1. **Episcopal/Christian Liturgical Calendar** - Automatic calculation of church holidays
+2. **Easter calculation algorithm** - Dates update automatically each year
+3. **13 additional liturgical observances** - Ash Wednesday through Trinity Sunday
+4. **Visibility-optimized liturgical colors** - Traditional colors adjusted for readability
 
-At a glance, the display shows:
+### Liturgical Holidays Included:
 
-- **Current time** — large, clear, always updating
-- **Full date** — day of week, month, date, and year, always visible
-- **Live weather** — pulls automatically from your zip code every 30 minutes
-- **Today's caregiver** — the right name shows automatically based on the day and shift; switches to the night caregiver at 7 PM. If no care team is configured, shows a warm daily greeting instead.
-- **Today's schedule** — upcoming events with full-screen pop-up reminders and a gentle chime at start time
-- **Medication reminders** — full-screen pop-ups with chime at your three configured times
-- **Wellness reminders** — automatic water and movement prompts during the day (toggleable)
-- **Daily prompts** — up to three customizable "For Today" messages, each with an optional emoji
-- **Holidays** — built-in recognition of major US holidays with color accents
-- **Day / Evening / Night modes** — shifts automatically to a dimmer palette in the evening and a low-glow dark mode overnight, so it never disturbs sleep
+**Lent & Holy Week:**
+- Transfiguration Sunday (Last Sunday before Lent)
+- Ash Wednesday
+- Palm Sunday
+- Maundy Thursday
+- Good Friday
+- Holy Saturday
+- Easter Sunday (updated wording: "Christ is Risen! Happy Easter!")
 
----
+**Easter Season:**
+- Ascension Day (40 days after Easter)
+- Pentecost Sunday (50 days after Easter)
+- Trinity Sunday (Sunday after Pentecost)
 
-## Display themes
+**Advent & Christmas:**
+- First Sunday of Advent
+- Christmas Eve
+- Epiphany (January 6)
 
-Choose from three daytime background themes at setup — or switch anytime from the settings panel:
+**Other:**
+- All Saints' Day (November 1)
 
-| Theme | Background | Greeting color | Heart color |
-|---|---|---|---|
-| Sage | Soft sage green `#d4dbc1` | Deep eggplant | Purple |
-| Warm Gray | Warm gray `#DDDBD5` | Dark rust | Rust amber |
-| Blush | Dusty blush `#EDE0DA` | Deep navy | Navy blue |
+### How It Works:
 
-Evening and night modes are always dark for all themes to minimize light exposure.
-
-Hearts use a standard Unicode character (♥) styled with CSS — renders correctly on all devices including older computers.
-
----
-
-## The settings panel
-
-The downloaded display file includes a **built-in settings panel** — no code required, ever. Tap the small **⚙ Settings** button in the bottom-left corner at any time — including while a reminder is on screen — to update:
-
-- **About** — display name and zip code
-- **Display theme** — Sage, Warm Gray, or Blush
-- **Care team** — up to 4 caregivers with day and night shift assignments for all 7 days, or toggle on "I care for myself" to collapse the care team fields
-- **Care team schedule** — assign each day's day shift and night shift independently
-- **Medication reminders** — morning, afternoon, and evening times
-- **Daily prompts** — three configurable "For Today" slots, each with an emoji field
-- **Events** — appointments, visits, activities with date, time, emoji, and description; add as many as needed
-- **Wellness reminders** — toggle water reminders and movement reminders on or off independently
-- **Text size** — Regular or Large Print
-
-Changes take effect instantly and are saved automatically to the device.
+- **Automatic calculation**: Easter and all related dates recalculate each year
+- **Priority display**: Liturgical holidays appear in "For Today" suggestions
+- **Appropriate icons**: ✝️ for solemn days, 🌿 for Palm Sunday, 🔥 for Pentecost, etc.
+- **Visibility-first colors**: Traditional liturgical colors adjusted to be readable in all modes
 
 ---
 
-## Text size options
+## Schedule Changes in 6.3 Base (from 6.2.4):
 
-| Mode | Section headings | Reminder items |
-|---|---|---|
-| Regular | 42px | 36px |
-| Large Print | 45px | 55px |
-
-Large Print mode was designed for people who wear glasses or are reading from across the room.
+- Morning medication moved to 8:00 AM
+- Water reminder ends at 5:00 PM (was 6:00 PM)
+- Added: CRA Ultrasound appointment (Feb 20)
+- Added: Tapera clan visit (Feb 22)
 
 ---
 
-## Care team scheduler
+## Current Configuration
 
-Enter up to four caregivers by name, then assign each day of the week a day shift and a night shift person. Day shift ends at 7 PM — the night caregiver takes over automatically. If no caregivers are entered, or if "I care for myself" is toggled on, the display shows a warm greeting instead.
+### Caregivers:
 
----
+**Day Shift (7:00 AM - 6:59 PM):**
+- **Monday-Friday:** Aster
+- **Saturday-Sunday:** Dionne
+- Displays as: "[Name] is here today 💜" (purple day, green evening, gray night)
 
-## Wellness reminders
+**Night Shift (7:00 PM - 6:59 AM):**
+- **Every night:** Marisha
+- Displays as: "[Name] is here tonight 💜/💚/🩶"
 
-Two automatic reminders run in the background during the day:
+### Medications (Pop-up alerts only):
+- 8:00 AM - Morning medication
+- 1:00 PM - Afternoon medication
+- 6:00 PM - Evening medication
 
-- **Drink water** — every hour from 11 AM to 5 PM
-- **Move & stretch** — every 2 hours from noon to 6 PM
+### Recurring Reminders (Pop-up alerts only):
+- **Water:** Every hour from 11:00 AM to 5:00 PM
+- **Movement:** Every 90 minutes from 12:45 PM to 5:45 PM
 
-Both are on by default and can be toggled off individually from the settings panel. Custom timing is available in MemoryLUV Pro.
+### Weekly Events (Shows in schedule):
+- **Sunday 10:30 AM** - Church service
 
----
+### Daily Suggestions (Shows in "For Today"):
+- 🧘🏾‍♀️ Breathe deeply
 
-## How to set it up
-
-**First time:**
-1. Complete the 6-step configurator and click **Download MemoryLUV**
-2. Save the `.html` file anywhere on your computer
-3. Double-click it to open in Chrome or Edge
-4. Press **F11** (PC) or **⌘ Ctrl F** (Mac) for full screen
-5. Cast or mirror to your TV, monitor, or tablet — it runs and updates automatically 24/7
-
-**Display options:**
-- A 28–32" monitor or TV works beautifully at a distance
-- An old iPad or tablet propped on a nightstand works for closer viewing
-- Open it from Dropbox, a USB drive, or any computer — it only needs a browser and an internet connection for live weather
-
-**To change anything after setup:**
-1. Tap the **⚙ Settings** button in the bottom-left corner of the display
-2. Make your changes — including toggling wellness reminders on or off
-3. Tap **Save & Update Display** — takes effect instantly
+### Weekly Suggestions (Shows in "For Today"):
+- 💬 Call a friend? (Mondays and Thursdays)
 
 ---
 
-## Why this exists
+## Liturgical Calendar Colors
 
-Most caregiving tools are built for caregivers. MemoryLUV is built for the person being cared for.
+These colors have been optimized for visibility across day, evening, and night modes:
 
-When someone is living with memory challenges or recovering from illness, small moments of disorientation — not knowing what day it is, who's with them, what's coming next — can compound into anxiety, confusion, and loss of dignity. MemoryLUV gives them a quiet, always-there reference they can look up and check on their own terms.
+- **Ash Wednesday:** Medium Purple (#9370DB)
+- **Transfiguration:** Light Gold/Khaki (#F0E68C)
+- **Palm Sunday:** Lime Green (#32CD32)
+- **Maundy Thursday:** Peru/Tan (#CD853F)
+- **Good Friday:** Firebrick Red (#B22222)
+- **Holy Saturday:** Dark Gray (#A9A9A9)
+- **Easter:** Gold (#FFD700) with ✝️
+- **Ascension:** Sky Blue (#87CEEB)
+- **Pentecost:** Crimson Red (#DC143C)
+- **Trinity Sunday:** Gold (#FFD700)
+- **First Advent:** Medium Purple (#9370DB)
+- **Christmas Eve:** Gold (#FFD700)
+- **Epiphany:** Gold (#FFD700)
+- **All Saints:** Gold (#FFD700)
 
-The person doesn't need to ask. They can just look.
-
-This product grew out of one family caregiver's experience building exactly this kind of display for her mother — a year of hospital stays, rehab, and coming home to a room with no way to track the day. What started as a personal solution became something other families deserve to have too.
-
----
-
-## Customization
-
-The downloaded `.html` file is yours to inspect and modify for personal use. For customization beyond the built-in settings panel — colors, timing adjustments, additional reminder types — we recommend using an AI assistant (Claude, ChatGPT, or similar) with your downloaded file.
-
-See **Terms of Use** for what's permitted. Personal customization: always welcome. Commercial use of any derivative: not permitted.
-
----
-
-## Coming soon
-
-- **MemoryLUV Pro** — custom reminder intervals, liturgical calendar, fourth medication time, color theme editor
-- **AttentionLUV** — for people with ADHD or attention challenges
-- **SerenityLUV** — for anxiety management and grounding
-- **MindLUV** — cognitive support and daily structure
-
-Register your purchase to be notified when new products and updates are available.
+All colors automatically dim to gray (#666666) in night mode (9 PM - 8 AM).
 
 ---
 
-## License
+## How Easter Calculation Works
 
-© 2026 RMS Omnimedia. Personal use only. See [Terms of Use](./TERMS-OF-USE.md) for full license terms.
+The system uses the **Computus algorithm** to calculate Easter Sunday for any year, then calculates all related observances:
 
-LUVWORKS is a trademark of RMS Omnimedia.
+- **Fixed offset dates:** Ash Wednesday (-46 days), Palm Sunday (-7 days), etc.
+- **Automatic yearly update:** Calculations run for current and next year
+- **No manual updates needed:** Liturgical calendar updates itself annually
 
-<!-- MemoryLUV © 2026 RMS Omnimedia / LUVWORKS. Personal use license only. Commercial use, resale, or redistribution of this file or any derivative is prohibited. See luvworks.co/terms for full terms. -->
+### Easter-Based Dates:
+- Transfiguration: Last Sunday before Ash Wednesday
+- Ash Wednesday: 46 days before Easter
+- Palm Sunday: 7 days before Easter
+- Maundy Thursday: 3 days before Easter
+- Good Friday: 2 days before Easter
+- Holy Saturday: 1 day before Easter
+- Easter Sunday: Calculated via Computus
+- Ascension: 39 days after Easter (always Thursday)
+- Pentecost: 49 days after Easter (Sunday)
+- Trinity Sunday: 56 days after Easter (Sunday)
+
+### Fixed Dates:
+- First Sunday of Advent: 4 Sundays before Christmas
+- Christmas Eve: December 24
+- All Saints' Day: November 1
+- Epiphany: January 6
+
+---
+
+## Editing Liturgical Holidays
+
+The liturgical calendar is **automatically generated** and doesn't need editing. However, if you want to:
+
+**Change the wording:**
+Find the `generateLiturgicalHolidays` function and edit the `text` field for any observance.
+
+**Change colors or icons:**
+Edit the `emoji` or `color` fields in the same function.
+
+**Disable specific observances:**
+Comment out or remove the section that adds that observance to the `liturgical` array.
+
+**Add new observances:**
+Follow the pattern in the function, calculating the date relative to Easter or as a fixed date.
+
+---
+
+## Combining Secular and Liturgical Holidays
+
+The system now tracks:
+- **16 secular holidays** (Federal holidays + Valentine's, Halloween, etc.)
+- **13 liturgical holidays** (Automatically calculated)
+- **Total: 29 recognized observances**
+
+When multiple observances fall on the same day, the first one found displays (liturgical are checked after secular in the combined list).
+
+---
+
+## Version History
+
+### Version 6.3 (Feb 19, 2026)
+- Added Episcopal/Christian liturgical calendar (13 observances)
+- Automatic Easter calculation with Computus algorithm
+- Auto-updating dates for all Easter-related observances
+- Easter changed from 🐣 to ✝️ with "Christ is Risen!" text
+- Visibility-optimized liturgical colors
+- Schedule updates: Morning med 8AM, water ends 5PM
+
+### Version 6.2 (Feb 11, 2026)
+- Added automatic holiday recognition (16 secular holidays)
+- Festive color-coded holidays in "For Today"
+- Holiday colors dim to gray in night mode
+- Day/night shift caregivers with different wording
+- Color-coded caregiver hearts (purple day, green evening, gray night)
+
+### Version 6.1 (Feb 10, 2026)
+- Optimized layout: top 40%, bottom 60%
+- Reduced caregiver name to 65px
+- Vertically centered caregiver line
+- Eliminated scrolling
+
+### Version 6.0 (Feb 9, 2026)
+- Two-column layout (Schedule 2/3, Suggestions 1/3)
+- Caregiver name display
+- "For Today" suggestions widget
+
+---
+
+## Technical Notes
+
+### Easter Algorithm:
+The Computus algorithm is the standard method used by Western Christianity to calculate Easter. It accounts for:
+- The lunar calendar
+- The spring equinox
+- Ensuring Easter falls on a Sunday
+- The 19-year Metonic cycle
+
+### Performance:
+- Liturgical dates are calculated once on page load
+- Calculations are lightweight (< 1ms)
+- Two years calculated (current + next) to handle year transitions
+
+### Maintenance:
+- No manual updates needed for moving dates
+- Page automatically recalculates on midnight refresh
+- Works correctly across year boundaries
+
+---
+
+## For Your Records
+
+**Church:** Episcopal/Anglican tradition
+**Service time:** Sundays 10:30 AM (local church via Zoom)
+**Additional viewing:** Washington National Cathedral (YouTube)
+**Liturgical season awareness:** Now automatically maintained
+
+---
+
+## Support
+
+The liturgical calendar follows the Western Christian/Episcopal calendar. Dates are calculated using the Gregorian calendar and standard Computus algorithm used by most Western churches.
+
+If observances seem incorrect, verify against your church's published liturgical calendar for the year.
+
+---
+
+## File Naming
+
+Save as:
+- `memory_display_v6.3.html`
+- `README_v6.3.md`
