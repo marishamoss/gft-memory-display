@@ -393,9 +393,12 @@
             // SCHEDULED EVENTS - Shows in "Today's Schedule"
             // Format: { date: "YYYY-MM-DD", time: "HH:MM", text: "Event", featured: true/false, icon: "emoji" }
             // IMPORTANT: Date must be in YYYY-MM-DD format with leading zeros (e.g., "2026-03-05" not "2026-3-5")
+            
             const SPECIFIC_DATE_EVENTS = [
                 // Add your appointments here - sample format below:
                 // { date: "2026-04-01", time: "10:30", text: "Doctor appointment", featured: true, icon: "🏥" },
+                { date: "2026-04-01", time: "11:30", text: "Occupational therapy discharge with Erica (arrives 11:30 AM-1:00 PM)", featured: true, icon: "✍🏾" },
+                { date: "2026-04-02", time: "10:30", text: "Telehealth meeting with Roberta", featured: true, icon: "🖥️" },
             ];
 
             // RECURRING WEEKLY EVENTS (Same day/time every week)
@@ -408,13 +411,14 @@
                 { time: "08:00", text: "Morning medication", featured: true, icon: "💊" },
                 { time: "13:00", text: "Afternoon medication", featured: true, icon: "💊" },
                 { time: "18:00", text: "Evening medication", featured: true, icon: "💊" },
+                { time: "12:00", text: "Check blood pressure", featured: true, icon: "🩺" },
             ];
 
             const WEEKLY_REMINDERS = [];
 
             // RECURRING REMINDERS (Throughout the day - pop-up only, not in schedule)
             const RECURRING_REMINDERS = [
-                { interval: 60, startTime: "11:00", endTime: "17:00", text: "Take a drink of water or other beverage", featured: true, icon: "💧" },
+                { interval: 90, startTime: "11:00", endTime: "17:00", text: "Take a drink of water or other beverage", featured: true, icon: "💧" },
                 { interval: 135, startTime: "12:45", endTime: "17:45", text: "Move your arms and legs and stretch", featured: true, icon: "🤸" },
             ];
 
