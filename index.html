@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Memory Display v6.3.2</title>
+        <title>Memory Display v6.5</title>
         <style>
             * {
                 margin: 0;
@@ -178,14 +178,14 @@
             }
 
             .reminders-title {
-                font-size: 45px;
+                font-size: 42px;
                 font-weight: 600;
                 margin-bottom: 25px;
                 opacity: 0.9;
             }
 
             .reminder-item {
-                font-size: 55px;
+                font-size: 36px;
                 padding: 18px 24px;
                 margin-bottom: 15px;
                 border-radius: 10px;
@@ -286,6 +286,62 @@
                 line-height: 1.3;
             }
 
+            .featured-video {
+                display: none;
+                width: 80vw;
+                height: 45vw;
+                max-height: 65vh;
+                border-radius: 12px;
+                overflow: hidden;
+                margin: 20px auto 0;
+            }
+
+            .featured-video.active {
+                display: block;
+            }
+
+            .featured-video iframe {
+                width: 100%;
+                height: 100%;
+                border: none;
+            }
+
+            .featured-countdown-block {
+                display: inline-flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                padding: 40px 60px;
+                border-radius: 24px;
+                margin-top: 10px;
+            }
+
+            body.day-mode .featured-countdown-block {
+                background-color: #c5cdb0;
+            }
+
+            body.evening-mode .featured-countdown-block {
+                background-color: #404040;
+            }
+
+            body.night-mode .featured-countdown-block {
+                background-color: #2a2a2a;
+            }
+
+            .featured-countdown-label {
+                font-size: 36px;
+                font-weight: 500;
+                opacity: 0.7;
+                letter-spacing: 1px;
+            }
+
+            .featured-countdown-number {
+                font-size: 140px;
+                font-weight: 300;
+                line-height: 1;
+            }
+
             @keyframes fadeIn {
                 from {
                     opacity: 0;
@@ -350,10 +406,11 @@
         </div>
 
         <div class="featured-overlay" id="featuredOverlay">
-            <div class="featured-content">
+            <div class="featured-content" id="featuredContent">
                 <div class="featured-icon" id="featuredIcon">⏰</div>
                 <div class="featured-time" id="featuredTime"></div>
                 <div class="featured-text" id="featuredText"></div>
+                <div class="featured-video" id="featuredVideo"></div>
             </div>
         </div>
 
@@ -392,61 +449,91 @@
 
             // SCHEDULED EVENTS - Shows in "Today's Schedule"
             // Format: { date: "YYYY-MM-DD", time: "HH:MM", text: "Event", featured: true/false, icon: "emoji" }
-            // IMPORTANT: Date must be in YYYY-MM-DD format with leading zeros (e.g., "2026-03-05" not "2026-3-5")
-            
+            // IMPORTANT: Date must be in YYYY-MM-DD format with leading zeros (e.g., "2026-03-05" not "2026-03-5")
             const SPECIFIC_DATE_EVENTS = [
-                // Add your appointments here - sample format below:
-                // { date: "2026-04-01", time: "10:30", text: "Doctor appointment", featured: true, icon: "🏥" },
-                { date: "2026-04-01", time: "11:30", text: "Occupational therapy discharge with Erica (arrives 11:30 AM-1:00 PM)", featured: true, icon: "✍🏾" },
-                { date: "2026-04-02", time: "10:30", text: "Telehealth meeting with Roberta", featured: true, icon: "🖥️" },
+                {
+                    date: "2026-03-05",
+                    time: "12:30",
+                    text: "Occupational therapy with Erica (arrives 12:30 PM-2:30 PM)",
+                    featured: true,
+                    icon: "✍🏾",
+                },
+                {
+                    date: "2026-03-05",
+                    time: "10:30",
+                    text: "Telehealth meeting with Roberta",
+                    featured: true,
+                    icon: "🖥️",
+                },
+                // Example: { date: "2026-03-15", time: "14:30", text: "Doctor appointment", featured: true, icon: "🏥" },
             ];
 
             // RECURRING WEEKLY EVENTS (Same day/time every week)
             const WEEKLY_EVENTS = [
-                { dayOfWeek: 0, time: "10:30", text: "Church service", featured: false, icon: "⛪" },
+                {
+                    dayOfWeek: 0,
+                    time: "10:30",
+                    text: "Church service",
+                    featured: false,
+                    icon: "⛪",
+                },
             ];
 
             // DAILY REMINDERS (Every day - pop-up only, not in schedule)
             const DAILY_REMINDERS = [
-                { time: "08:00", text: "Morning medication", featured: true, icon: "💊" },
-                { time: "13:00", text: "Afternoon medication", featured: true, icon: "💊" },
-                { time: "18:00", text: "Evening medication", featured: true, icon: "💊" },
-                { time: "12:00", text: "Check blood pressure", featured: true, icon: "🩺" },
+                {
+                    time: "08:00",
+                    text: "Morning medication",
+                    featured: true,
+                    icon: "💊",
+                },
+                {
+                    time: "13:00",
+                    text: "Afternoon medication",
+                    featured: true,
+                    icon: "💊",
+                },
+                {
+                    time: "18:00",
+                    text: "Evening medication",
+                    featured: true,
+                    icon: "💊",
+                },
+                {
+                    time: "14:04",
+                    text: "Time to stretch your hands",
+                    featured: true,
+                    icon: "🤸",
+                    videoId: "Y_Ug9C9BMus",
+                },
+                //{ time: "15:00", text: "Time to stretch your legs", featured: true, icon: "🦵", videoId: "LEG_VIDEO_ID" },
             ];
 
             const WEEKLY_REMINDERS = [];
 
             // RECURRING REMINDERS (Throughout the day - pop-up only, not in schedule)
             const RECURRING_REMINDERS = [
-                { interval: 90, startTime: "11:00", endTime: "17:00", text: "Take a drink of water or other beverage", featured: true, icon: "💧" },
-                { interval: 135, startTime: "12:45", endTime: "17:45", text: "Move your arms and legs and stretch", featured: true, icon: "🤸" },
+                {
+                    interval: 60,
+                    startTime: "11:00",
+                    endTime: "17:00",
+                    text: "Take a drink of water or other beverage",
+                    featured: true,
+                    icon: "💧",
+                },
+                {
+                    interval: 90,
+                    startTime: "12:45",
+                    endTime: "17:45",
+                    text: "Move your arms and legs and stretch",
+                    featured: true,
+                    icon: "🤸",
+                },
             ];
 
             // HOLIDAYS - Auto-shows in "For Today" with festive colors
-            const HOLIDAYS = [
-                { month: 1, day: 1, text: "Happy New Year!", emoji: "🎊", color: "#FFD700" },
-                { month: 1, day: 20, text: "Happy MLK Jr. Day!", emoji: "✊🏾", color: "#800020" },
-                { month: 2, day: 17, text: "Happy Presidents' Day!", emoji: "🦅", color: "#002868" },
-                { month: 2, day: 14, text: "Happy Valentine's Day!", emoji: "❤️", color: "#E31B23" },
-                { month: 3, day: 17, text: "Happy St. Patrick's Day!", emoji: "🍀", color: "#135425" },
-                { month: 4, day: 5, text: "Happy Easter!", emoji: "🐣", color: "#461767" },
-                { month: 5, day: 11, text: "Happy Mother's Day!", emoji: "💐", color: "#FF69B4" },
-                { month: 5, day: 26, text: "Happy Memorial Day!", emoji: "🇺🇸", color: "#B22234" },
-                { month: 6, day: 15, text: "Happy Father's Day!", emoji: "👔", color: "#1E3A8A" },
-                { month: 6, day: 19, text: "Happy Juneteenth!", emoji: "🙌🏾", color: "#008000" },
-                { month: 7, day: 4, text: "Happy Independence Day!", emoji: "🎆", color: "#B22234" },
-                { month: 9, day: 1, text: "Happy Labor Day!", emoji: "🛠️", color: "#4A4A4A" },
-                { month: 10, day: 13, text: "Happy Indigenous Peoples' Day!", emoji: "🪶", color: "#8B4513" },
-                { month: 10, day: 31, text: "Happy Halloween!", emoji: "🎃", color: "#FF6600" },
-                { month: 11, day: 11, text: "Happy Veterans Day!", emoji: "🪖", color: "#4A5D23" },
-                { month: 11, day: 27, text: "Happy Thanksgiving!", emoji: "🦃", color: "#D2691E" },
-                { month: 12, day: 25, text: "Merry Christmas!", emoji: "🎄", color: "#165B33" },
-                { month: 12, day: 31, text: "Happy New Year's Eve!", emoji: "🎉", color: "#C9A0DC" },
-            ];
 
-            const DAILY_SUGGESTIONS = [
-                { text: "Remember to breathe deeply", icon: "🧘🏾‍♀️" },
-            ];
+            const DAILY_SUGGESTIONS = [{ text: "Breathe deeply", icon: "🧘🏾‍♀️" }];
 
             const WEEKLY_SUGGESTIONS = [
                 { dayOfWeek: 1, text: "Call a friend?", icon: "💬" },
@@ -464,23 +551,119 @@
             // END CONFIGURATION SECTION
             // ============================================
 
+            // ============================================
+            // DYNAMIC HOLIDAY CALCULATION FUNCTIONS
+            // ============================================
+
+            // Calculate Easter Sunday using the Computus algorithm (Gregorian calendar)
+            function calculateEaster(year) {
+                const a = year % 19;
+                const b = Math.floor(year / 100);
+                const c = year % 100;
+                const d = Math.floor(b / 4);
+                const e = b % 4;
+                const f = Math.floor((b + 8) / 25);
+                const g = Math.floor((b - f + 1) / 3);
+                const h = (19 * a + b - d - g + 15) % 30;
+                const i = Math.floor(c / 4);
+                const k = c % 4;
+                const l = (32 + 2 * e + 2 * i - h - k) % 7;
+                const m = Math.floor((a + 11 * h + 22 * l) / 451);
+                const month = Math.floor((h + l - 7 * m + 114) / 31);
+                const day = ((h + l - 7 * m + 114) % 31) + 1;
+                return { month, day };
+            }
+
+            // Get the Nth occurrence of a weekday in a month
+            // weekday: 0=Sunday, 1=Monday, etc.
+            // n: 1=first, 2=second, 3=third, 4=fourth
+            function getNthWeekday(year, month, weekday, n) {
+                const firstDay = new Date(year, month - 1, 1);
+                const firstWeekday = firstDay.getDay();
+                
+                // Calculate the first occurrence of the target weekday
+                let firstOccurrence = 1 + ((weekday - firstWeekday + 7) % 7);
+                
+                // Calculate the nth occurrence
+                const nthOccurrence = firstOccurrence + (n - 1) * 7;
+                
+                return nthOccurrence;
+            }
+
+            // Get the last occurrence of a weekday in a month
+            function getLastWeekday(year, month, weekday) {
+                // Start from the last day of the month
+                const lastDay = new Date(year, month, 0);
+                const lastDayNum = lastDay.getDate();
+                const lastDayWeekday = lastDay.getDay();
+                
+                // Work backwards to find the last occurrence of the target weekday
+                let daysBack = (lastDayWeekday - weekday + 7) % 7;
+                return lastDayNum - daysBack;
+            }
+
+            // Generate dynamic holidays for the current year
+            function getDynamicHolidays(year) {
+                const easter = calculateEaster(year);
+                
+                return [
+                    // FIXED HOLIDAYS (same date every year)
+                    { month: 1, day: 1, text: "Happy New Year!", emoji: "🎊", color: "#FFD700" },
+                    { month: 2, day: 14, text: "Happy Valentine's Day!", emoji: "❤️", color: "#E31B23" },
+                    { month: 3, day: 17, text: "Happy St. Patrick's Day!", emoji: "🍀", color: "#135425" },
+                    { month: 6, day: 19, text: "Happy Juneteenth!", emoji: "🙌🏾", color: "#008000" },
+                    { month: 7, day: 4, text: "Happy Independence Day!", emoji: "🎆", color: "#B22234" },
+                    { month: 10, day: 31, text: "Happy Halloween!", emoji: "🎃", color: "#FF6600" },
+                    { month: 11, day: 11, text: "Happy Veterans Day!", emoji: "🪖", color: "#4A5D23" },
+                    { month: 12, day: 25, text: "Merry Christmas!", emoji: "🎄", color: "#165B33" },
+                    { month: 12, day: 31, text: "Happy New Year's Eve!", emoji: "🎉", color: "#C9A0DC" },
+                    
+                    // DYNAMIC HOLIDAYS (calculated based on year)
+                    { month: 1, day: getNthWeekday(year, 1, 1, 3), text: "Happy MLK Jr. Day!", emoji: "✊🏾", color: "#800020" },
+                    { month: 2, day: getNthWeekday(year, 2, 1, 3), text: "Happy Presidents' Day!", emoji: "🦅", color: "#002868" },
+                    { month: easter.month, day: easter.day, text: "Happy Easter!", emoji: "🐣", color: "#B19CD9" },
+                    { month: 5, day: getNthWeekday(year, 5, 0, 2), text: "Happy Mother's Day!", emoji: "💐", color: "#FF69B4" },
+                    { month: 5, day: getLastWeekday(year, 5, 1), text: "Happy Memorial Day!", emoji: "🇺🇸", color: "#B22234" },
+                    { month: 6, day: getNthWeekday(year, 6, 0, 3), text: "Happy Father's Day!", emoji: "👔", color: "#1E3A8A" },
+                    { month: 9, day: getNthWeekday(year, 9, 1, 1), text: "Happy Labor Day!", emoji: "🛠️", color: "#4A4A4A" },
+                    { month: 10, day: getNthWeekday(year, 10, 1, 2), text: "Happy Indigenous Peoples' Day!", emoji: "🪶", color: "#8B4513" },
+                    { month: 11, day: getNthWeekday(year, 11, 4, 4), text: "Happy Thanksgiving!", emoji: "🦃", color: "#D2691E" },
+                ];
+            }
+
+            // ============================================
+            // END HOLIDAY CALCULATION FUNCTIONS
+            // ============================================
+
             let allReminders = [];
             let activeFeature = null;
             let weatherUpdateInterval;
             let lastRefreshCheck = Date.now();
+            let HOLIDAYS = []; // Will be populated dynamically on init
 
             function generateChime() {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const audioContext = new (
+                    window.AudioContext || window.webkitAudioContext
+                )();
                 const duration = 0.3;
                 return new Promise((resolve) => {
                     const oscillator = audioContext.createOscillator();
                     const gainNode = audioContext.createGain();
                     oscillator.connect(gainNode);
                     gainNode.connect(audioContext.destination);
-                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-                    oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + duration);
+                    oscillator.frequency.setValueAtTime(
+                        800,
+                        audioContext.currentTime,
+                    );
+                    oscillator.frequency.exponentialRampToValueAtTime(
+                        400,
+                        audioContext.currentTime + duration,
+                    );
                     gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                    gainNode.gain.exponentialRampToValueAtTime(
+                        0.01,
+                        audioContext.currentTime + duration,
+                    );
                     oscillator.start(audioContext.currentTime);
                     oscillator.stop(audioContext.currentTime + duration);
                     setTimeout(resolve, duration * 1000);
@@ -502,38 +685,60 @@
 
             function updateTime() {
                 const now = new Date();
-                const timeString = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
-                const dateString = now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+                const timeString = now.toLocaleTimeString("en-US", {
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true,
+                });
+                const dateString = now.toLocaleDateString("en-US", {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                });
                 document.getElementById("time").textContent = timeString;
                 document.getElementById("date").textContent = dateString;
                 updateDayNightMode();
                 displayCaregiver();
                 checkReminders();
                 if (window.currentWeatherCode !== undefined) {
-                    const weatherInfo = getWeatherInfo(window.currentWeatherCode);
-                    document.getElementById("weatherIcon").textContent = weatherInfo.icon;
+                    const weatherInfo = getWeatherInfo(
+                        window.currentWeatherCode,
+                    );
+                    document.getElementById("weatherIcon").textContent =
+                        weatherInfo.icon;
                 }
             }
 
             async function updateWeather() {
                 try {
-                    const geoResponse = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(LOCATION)}&count=1&language=en&format=json`);
+                    const geoResponse = await fetch(
+                        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(LOCATION)}&count=1&language=en&format=json`,
+                    );
                     const geoData = await geoResponse.json();
                     if (geoData.results && geoData.results.length > 0) {
                         const { latitude, longitude } = geoData.results[0];
-                        const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&temperature_unit=fahrenheit&timezone=auto`);
+                        const weatherResponse = await fetch(
+                            `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&temperature_unit=fahrenheit&timezone=auto`,
+                        );
                         const weatherData = await weatherResponse.json();
-                        const temp = Math.round(weatherData.current.temperature_2m);
+                        const temp = Math.round(
+                            weatherData.current.temperature_2m,
+                        );
                         const weatherCode = weatherData.current.weather_code;
-                        document.getElementById("temperature").textContent = `${temp}°F`;
+                        document.getElementById("temperature").textContent =
+                            `${temp}°F`;
                         const weatherInfo = getWeatherInfo(weatherCode);
-                        document.getElementById("weatherIcon").textContent = weatherInfo.icon;
-                        document.getElementById("weatherDesc").textContent = weatherInfo.description;
+                        document.getElementById("weatherIcon").textContent =
+                            weatherInfo.icon;
+                        document.getElementById("weatherDesc").textContent =
+                            weatherInfo.description;
                         window.currentWeatherCode = weatherCode;
                     }
                 } catch (error) {
                     console.error("Weather fetch error:", error);
-                    document.getElementById("weatherDesc").textContent = "Weather unavailable";
+                    document.getElementById("weatherDesc").textContent =
+                        "Weather unavailable";
                 }
             }
 
@@ -541,9 +746,18 @@
                 const hour = new Date().getHours();
                 const isNightTime = hour >= 20 || hour < 6;
                 const weatherMap = {
-                    0: { icon: isNightTime ? "🌙" : "☀️", description: "Clear sky" },
-                    1: { icon: isNightTime ? "🌙" : "🌤️", description: "Mainly clear" },
-                    2: { icon: isNightTime ? "☁️" : "⛅", description: "Partly cloudy" },
+                    0: {
+                        icon: isNightTime ? "🌙" : "☀️",
+                        description: "Clear sky",
+                    },
+                    1: {
+                        icon: isNightTime ? "🌙" : "🌤️",
+                        description: "Mainly clear",
+                    },
+                    2: {
+                        icon: isNightTime ? "☁️" : "⛅",
+                        description: "Partly cloudy",
+                    },
                     3: { icon: "☁️", description: "Overcast" },
                     45: { icon: "🌫️", description: "Foggy" },
                     48: { icon: "🌫️", description: "Foggy" },
@@ -566,52 +780,103 @@
                     96: { icon: "⛈️", description: "Thunderstorm with hail" },
                     99: { icon: "⛈️", description: "Thunderstorm with hail" },
                 };
-                return weatherMap[code] || { icon: isNightTime ? "🌙" : "🌤️", description: "Unknown" };
+                return (
+                    weatherMap[code] || {
+                        icon: isNightTime ? "🌙" : "🌤️",
+                        description: "Unknown",
+                    }
+                );
             }
 
             function generateReminders() {
+                console.log(
+                    "generateReminders called at:",
+                    new Date().toLocaleTimeString(),
+                );
+
                 allReminders = [];
                 const today = new Date();
                 const todayDayOfWeek = today.getDay();
-                
+
                 // FIXED: Use local date, not UTC date
                 const year = today.getFullYear();
-                const month = String(today.getMonth() + 1).padStart(2, '0');
-                const day = String(today.getDate()).padStart(2, '0');
+                const month = String(today.getMonth() + 1).padStart(2, "0");
+                const day = String(today.getDate()).padStart(2, "0");
                 const todayDateString = `${year}-${month}-${day}`;
+
+                console.log("Today's date string:", todayDateString);
 
                 SPECIFIC_DATE_EVENTS.forEach((event) => {
                     if (event.date === todayDateString) {
-                        allReminders.push({ time: event.time, text: event.text, featured: event.featured, icon: event.icon, schedule: true });
+                        allReminders.push({
+                            time: event.time,
+                            text: event.text,
+                            featured: event.featured,
+                            icon: event.icon,
+                            schedule: true,
+                            videoId: event.videoId || null,
+                        });
                     }
                 });
 
                 WEEKLY_EVENTS.forEach((event) => {
                     if (event.dayOfWeek === todayDayOfWeek) {
-                        allReminders.push({ time: event.time, text: event.text, featured: event.featured, icon: event.icon, schedule: true });
+                        allReminders.push({
+                            time: event.time,
+                            text: event.text,
+                            featured: event.featured,
+                            icon: event.icon,
+                            schedule: true,
+                        });
                     }
                 });
 
                 DAILY_REMINDERS.forEach((reminder) => {
-                    allReminders.push({ time: reminder.time, text: reminder.text, featured: reminder.featured, icon: reminder.icon, schedule: false });
+                    allReminders.push({
+                        time: reminder.time,
+                        text: reminder.text,
+                        featured: reminder.featured,
+                        icon: reminder.icon,
+                        schedule: false,
+                        videoId: reminder.videoId || null,
+                    });
                 });
 
                 WEEKLY_REMINDERS.forEach((reminder) => {
                     if (reminder.dayOfWeek === todayDayOfWeek) {
-                        allReminders.push({ time: reminder.time, text: reminder.text, featured: reminder.featured, icon: reminder.icon, schedule: false });
+                        allReminders.push({
+                            time: reminder.time,
+                            text: reminder.text,
+                            featured: reminder.featured,
+                            icon: reminder.icon,
+                            schedule: false,
+                        });
                     }
                 });
 
                 RECURRING_REMINDERS.forEach((recurring) => {
                     const startParts = recurring.startTime.split(":");
                     const endParts = recurring.endTime.split(":");
-                    const startMinutes = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
-                    const endMinutes = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
-                    for (let minutes = startMinutes; minutes <= endMinutes; minutes += recurring.interval) {
+                    const startMinutes =
+                        parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
+                    const endMinutes =
+                        parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
+                    for (
+                        let minutes = startMinutes;
+                        minutes <= endMinutes;
+                        minutes += recurring.interval
+                    ) {
                         const hours = Math.floor(minutes / 60);
                         const mins = minutes % 60;
                         const timeString = `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
-                        allReminders.push({ time: timeString, text: recurring.text, featured: recurring.featured, icon: recurring.icon, schedule: false });
+                        allReminders.push({
+                            time: timeString,
+                            text: recurring.text,
+                            featured: recurring.featured,
+                            icon: recurring.icon,
+                            schedule: false,
+                            videoId: recurring.videoId || null,
+                        });
                     }
                 });
 
@@ -624,13 +889,12 @@
                 const now = new Date();
                 const currentHour = now.getHours();
                 const todayDayOfWeek = now.getDay();
-                
-                // FIXED: Use local date, not UTC date
+
                 const year = now.getFullYear();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const day = String(now.getDate()).padStart(2, '0');
+                const month = String(now.getMonth() + 1).padStart(2, "0");
+                const day = String(now.getDate()).padStart(2, "0");
                 const todayDateString = `${year}-${month}-${day}`;
-                
+
                 let caregiverName = "";
                 let isNightShift = currentHour >= 19 || currentHour < 7;
 
@@ -651,18 +915,28 @@
                         yesterday.setDate(yesterday.getDate() - 1);
                         nightShiftDay = yesterday.getDay();
                         const yYear = yesterday.getFullYear();
-                        const yMonth = String(yesterday.getMonth() + 1).padStart(2, '0');
-                        const yDay = String(yesterday.getDate()).padStart(2, '0');
+                        const yMonth = String(
+                            yesterday.getMonth() + 1,
+                        ).padStart(2, "0");
+                        const yDay = String(yesterday.getDate()).padStart(
+                            2,
+                            "0",
+                        );
                         nightShiftDate = `${yYear}-${yMonth}-${yDay}`;
                     }
-                    const substituteNight = SUBSTITUTE_NIGHT_CAREGIVERS.find((c) => c.date === nightShiftDate);
+                    const substituteNight = SUBSTITUTE_NIGHT_CAREGIVERS.find(
+                        (c) => c.date === nightShiftDate,
+                    );
                     if (substituteNight) {
                         caregiverName = substituteNight.name;
                     } else {
-                        const nightCaregiver = NIGHT_CAREGIVERS.find((c) => c.dayOfWeek === nightShiftDay);
+                        const nightCaregiver = NIGHT_CAREGIVERS.find(
+                            (c) => c.dayOfWeek === nightShiftDay,
+                        );
                         if (nightCaregiver) caregiverName = nightCaregiver.name;
                     }
-                    const caregiverElement = document.getElementById("caregiverName");
+                    const caregiverElement =
+                        document.getElementById("caregiverName");
                     if (caregiverName) {
                         caregiverElement.innerHTML = `${caregiverName} is here tonight ${heartEmoji}`;
                         caregiverElement.style.display = "block";
@@ -670,14 +944,20 @@
                         caregiverElement.style.display = "none";
                     }
                 } else {
-                    const substitute = SUBSTITUTE_CAREGIVERS.find((c) => c.date === todayDateString);
+                    const substitute = SUBSTITUTE_CAREGIVERS.find(
+                        (c) => c.date === todayDateString,
+                    );
                     if (substitute) {
                         caregiverName = substitute.name;
                     } else {
-                        const weeklyCaregiver = WEEKLY_CAREGIVERS.find((c) => c.dayOfWeek === todayDayOfWeek);
-                        if (weeklyCaregiver) caregiverName = weeklyCaregiver.name;
+                        const weeklyCaregiver = WEEKLY_CAREGIVERS.find(
+                            (c) => c.dayOfWeek === todayDayOfWeek,
+                        );
+                        if (weeklyCaregiver)
+                            caregiverName = weeklyCaregiver.name;
                     }
-                    const caregiverElement = document.getElementById("caregiverName");
+                    const caregiverElement =
+                        document.getElementById("caregiverName");
                     if (caregiverName) {
                         caregiverElement.innerHTML = `${caregiverName} is here today ${heartEmoji}`;
                         caregiverElement.style.display = "block";
@@ -693,10 +973,13 @@
                 const remindersList = document.getElementById("remindersList");
                 remindersList.innerHTML = "";
 
-                const scheduleItems = allReminders.filter((r) => r.schedule === true);
+                const scheduleItems = allReminders.filter(
+                    (r) => r.schedule === true,
+                );
 
                 if (scheduleItems.length === 0) {
-                    remindersList.innerHTML = '<div class="reminder-item">No events scheduled for today</div>';
+                    remindersList.innerHTML =
+                        '<div class="reminder-item">No events scheduled for today</div>';
                     return;
                 }
 
@@ -715,21 +998,23 @@
             function displaySuggestions() {
                 const today = new Date();
                 const todayDayOfWeek = today.getDay();
-                
-                // FIXED: Use local date, not UTC date
+
                 const year = today.getFullYear();
-                const month = String(today.getMonth() + 1).padStart(2, '0');
-                const day = String(today.getDate()).padStart(2, '0');
+                const month = String(today.getMonth() + 1).padStart(2, "0");
+                const day = String(today.getDate()).padStart(2, "0");
                 const todayDateString = `${year}-${month}-${day}`;
-                
+
                 const todayMonth = today.getMonth() + 1;
                 const todayDay = today.getDate();
                 const currentHour = today.getHours();
-                const suggestionsList = document.getElementById("suggestionsList");
+                const suggestionsList =
+                    document.getElementById("suggestionsList");
                 suggestionsList.innerHTML = "";
                 let allSuggestions = [];
 
-                const todayHoliday = HOLIDAYS.find((h) => h.month === todayMonth && h.day === todayDay);
+                const todayHoliday = HOLIDAYS.find(
+                    (h) => h.month === todayMonth && h.day === todayDay,
+                );
                 if (todayHoliday) {
                     let textColor;
                     if (currentHour >= 21 || currentHour < 8) {
@@ -737,36 +1022,53 @@
                     } else {
                         textColor = todayHoliday.color;
                     }
-                    allSuggestions.push({ text: todayHoliday.text, icon: todayHoliday.emoji, color: textColor, isHoliday: true });
+                    allSuggestions.push({
+                        text: todayHoliday.text,
+                        icon: todayHoliday.emoji,
+                        color: textColor,
+                        isHoliday: true,
+                    });
                 }
 
                 SPECIFIC_SUGGESTIONS.forEach((suggestion) => {
                     if (suggestion.date === todayDateString) {
-                        allSuggestions.push({ text: suggestion.text, icon: suggestion.icon });
+                        allSuggestions.push({
+                            text: suggestion.text,
+                            icon: suggestion.icon,
+                        });
                     }
                 });
 
                 DAILY_SUGGESTIONS.forEach((suggestion) => {
-                    allSuggestions.push({ text: suggestion.text, icon: suggestion.icon });
+                    allSuggestions.push({
+                        text: suggestion.text,
+                        icon: suggestion.icon,
+                    });
                 });
 
                 WEEKLY_SUGGESTIONS.forEach((suggestion) => {
                     if (suggestion.dayOfWeek === todayDayOfWeek) {
-                        allSuggestions.push({ text: suggestion.text, icon: suggestion.icon });
+                        allSuggestions.push({
+                            text: suggestion.text,
+                            icon: suggestion.icon,
+                        });
                     }
                 });
 
                 const displaySuggestions = allSuggestions.slice(0, 3);
 
                 if (displaySuggestions.length === 0) {
-                    suggestionsList.innerHTML = '<div class="reminder-item">Enjoy your day</div>';
+                    suggestionsList.innerHTML =
+                        '<div class="reminder-item">Enjoy your day</div>';
                     return;
                 }
 
                 displaySuggestions.forEach((suggestion) => {
                     const item = document.createElement("div");
                     item.className = "reminder-item";
-                    const colorStyle = suggestion.isHoliday ? `style="color: ${suggestion.color};"` : "";
+                    const colorStyle = suggestion.isHoliday
+                        ? `style="color: ${suggestion.color};"`
+                        : "";
                     item.innerHTML = `<span class="reminder-text" ${colorStyle}>${suggestion.icon} ${suggestion.text}</span>`;
                     suggestionsList.appendChild(item);
                 });
@@ -784,30 +1086,99 @@
                 const now = new Date();
                 const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
                 if (activeFeature) return;
-                const featuredReminder = allReminders.find((r) => r.time === currentTime && r.featured);
+                const featuredReminder = allReminders.find(
+                    (r) => r.time === currentTime && r.featured,
+                );
                 if (featuredReminder) showFeaturedReminder(featuredReminder);
             }
 
             async function showFeaturedReminder(reminder) {
                 activeFeature = reminder;
                 const overlay = document.getElementById("featuredOverlay");
-                document.getElementById("featuredIcon").textContent = reminder.icon;
-                document.getElementById("featuredTime").textContent = formatTime12Hour(reminder.time);
-                document.getElementById("featuredText").textContent = reminder.text;
+                const videoDiv = document.getElementById("featuredVideo");
+                const iconEl = document.getElementById("featuredIcon");
+                const timeEl = document.getElementById("featuredTime");
+                const textEl = document.getElementById("featuredText");
+
+                // Reset state from any previous overlay
+                videoDiv.classList.remove("active");
+                videoDiv.innerHTML = "";
+                iconEl.style.display = "block";
+                timeEl.style.display = "block";
+                textEl.className = "featured-text";
+
+                // Phase 1: Announcement (0:00 – 0:10)
+                iconEl.textContent = reminder.icon;
+                timeEl.textContent = formatTime12Hour(reminder.time);
+                textEl.textContent = reminder.text;
                 overlay.classList.add("active");
                 await generateChime();
-                setTimeout(() => {
-                    overlay.classList.remove("active");
-                    activeFeature = null;
-                    displayReminders();
-                }, FEATURED_DURATION * 60 * 1000);
+
+                if (reminder.videoId) {
+                    // Phase 2: Countdown (0:10 – 0:20)
+                    setTimeout(() => {
+                        iconEl.style.display = "none";
+                        timeEl.style.display = "none";
+                        let count = 10;
+                        textEl.className = "featured-text";
+                        textEl.innerHTML = `<div class="featured-countdown-block"><div class="featured-countdown-label">Starting in</div><div class="featured-countdown-number" id="countdownNum">${count}</div></div>`;
+                        const ticker = setInterval(() => {
+                            count--;
+                            const numEl =
+                                document.getElementById("countdownNum");
+                            if (count > 0) {
+                                if (numEl) numEl.textContent = count;
+                            } else {
+                                clearInterval(ticker);
+                                // Phase 3: Video (0:20 – 2:40)
+                                textEl.innerHTML = "";
+                                videoDiv.innerHTML = `<iframe src="https://www.youtube.com/embed/${reminder.videoId}?autoplay=1&mute=1&controls=0&rel=0&modestbranding=1" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+                                videoDiv.classList.add("active");
+                            }
+                        }, 1000);
+                    }, 10000);
+
+                    // Phase 4: Congrats (2:40 – 3:00)
+                    setTimeout(() => {
+                        videoDiv.classList.remove("active");
+                        videoDiv.innerHTML = "";
+                        textEl.className = "featured-text";
+                        iconEl.style.display = "block";
+                        timeEl.style.display = "none";
+                        iconEl.textContent = "💙";
+                        textEl.textContent =
+                            "Great job! Remember to keep moving.";
+                    }, 160000);
+
+                    // Close at 3:00
+                    setTimeout(() => {
+                        overlay.classList.remove("active");
+                        activeFeature = null;
+                        textEl.className = "featured-text";
+                        displayReminders();
+                    }, 180000);
+                } else {
+                    // No video — original behavior
+                    setTimeout(
+                        () => {
+                            overlay.classList.remove("active");
+                            activeFeature = null;
+                            displayReminders();
+                        },
+                        FEATURED_DURATION * 60 * 1000,
+                    );
+                }
             }
 
             function checkForRefresh() {
                 const now = new Date();
                 const currentHour = now.getHours();
                 const currentMinute = now.getMinutes();
-                if (currentHour === 0 && currentMinute === 0 && !activeFeature) {
+                if (
+                    currentHour === 0 &&
+                    currentMinute === 0 &&
+                    !activeFeature
+                ) {
                     console.log("Midnight refresh");
                     location.reload();
                     return;
@@ -817,7 +1188,9 @@
                 const fifteenMinutes = 15 * 60 * 1000;
                 if (isWakingHours && timeSinceLastCheck >= fifteenMinutes) {
                     if (activeFeature) {
-                        console.log("Skipping refresh - featured reminder active");
+                        console.log(
+                            "Skipping refresh - featured reminder active",
+                        );
                         lastRefreshCheck = Date.now();
                         return;
                     }
@@ -828,18 +1201,33 @@
             }
 
             function init() {
+                // Generate holidays for the current year
+                const currentYear = new Date().getFullYear();
+                HOLIDAYS = getDynamicHolidays(currentYear);
+                
                 updateTime();
                 updateWeather();
                 generateReminders();
                 displayCaregiver();
                 setInterval(updateTime, 1000);
                 setInterval(checkForRefresh, 60 * 1000);
-                weatherUpdateInterval = setInterval(updateWeather, 30 * 60 * 1000);
+                weatherUpdateInterval = setInterval(
+                    updateWeather,
+                    30 * 60 * 1000,
+                );
                 setInterval(() => {
                     const now = new Date();
-                    if (now.getHours() === 0 && now.getMinutes() === 0) generateReminders();
+                    if (now.getHours() === 0 && now.getMinutes() === 0) {
+                        // Regenerate holidays for new year if it's midnight on Jan 1
+                        if (now.getMonth() === 0 && now.getDate() === 1) {
+                            HOLIDAYS = getDynamicHolidays(now.getFullYear());
+                        }
+                        generateReminders();
+                    }
                 }, 60 * 1000);
-                console.log("Memory Display v6.3.2 initialized");
+                console.log(
+                    "Memory Display v6.5 initialized - Dynamic holidays enabled, styled countdown, muted autoplay",
+                );
             }
 
             window.addEventListener("load", init);
