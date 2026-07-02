@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Memory Display v6.5</title>
+        <title>Memory Display v6.6 — Remote Config (Pro dogfood)</title>
         <style>
             * {
                 margin: 0;
@@ -178,14 +178,16 @@
             }
 
             .reminders-title {
-                font-size: 42px;
+                /* Large Print restored (was 42px) — readable from across the room */
+                font-size: 45px;
                 font-weight: 600;
                 margin-bottom: 25px;
                 opacity: 0.9;
             }
 
             .reminder-item {
-                font-size: 36px;
+                /* Large Print restored (was 36px) — matches commercial Large Print spec */
+                font-size: 55px;
                 padding: 18px 24px;
                 margin-bottom: 15px;
                 border-radius: 10px;
@@ -421,8 +423,21 @@
 
             let LOCATION = "20904";
 
+            // ============================================
+            // REMOTE CONFIG (MemoryLUV Pro dogfood)
+            // ============================================
+            // After deploying the Cloudflare Worker, replace WORKER_URL
+            // below with your real Worker address, e.g.:
+            //   "https://memoryluv-config.YOURNAME.workers.dev"
+            // Leave the placeholder as-is and the display behaves exactly
+            // like v6.5 — fully local, no network config.
+            const WORKER_URL = "PASTE-YOUR-WORKER-URL-HERE";
+            const DISPLAY_ID = "UuvbXKSC_z9O3eAo";
+            const DISPLAY_KEY = "YEtdDjYuEmfpODLitd3ZeYjBOQgn2x3A";
+            // ============================================
+
             // DAY SHIFT CAREGIVERS (7:00 AM - 6:59 PM)
-            const WEEKLY_CAREGIVERS = [
+            let WEEKLY_CAREGIVERS = [
                 { dayOfWeek: 1, name: "Dionne" },
                 { dayOfWeek: 2, name: "Dionne" },
                 { dayOfWeek: 3, name: "Dionne" },
@@ -432,7 +447,7 @@
                 { dayOfWeek: 0, name: "Dionne" },
             ];
 
-          const SUBSTITUTE_CAREGIVERS = [
+          let SUBSTITUTE_CAREGIVERS = [
     { date: "2026-06-23", name: "Marisha" },
 
              { date: "2026-07-01", name: "Marva" },
@@ -450,7 +465,7 @@
              { date: "2026-07-05", name: "Aster" },
 ];
             // NIGHT SHIFT CAREGIVERS (7:00 PM - 6:59 AM)
-            const NIGHT_CAREGIVERS = [
+            let NIGHT_CAREGIVERS = [
                 { dayOfWeek: 0, name: "Marisha" },
                 { dayOfWeek: 1, name: "Marisha" },
                 { dayOfWeek: 2, name: "Marisha" },
@@ -460,12 +475,12 @@
                 { dayOfWeek: 6, name: "Marisha" },
             ];
 
-            const SUBSTITUTE_NIGHT_CAREGIVERS =  [{ date: "2026-06-24", name: "Marva" },];
+            let SUBSTITUTE_NIGHT_CAREGIVERS =  [{ date: "2026-06-24", name: "Marva" },];
 
             // SCHEDULED EVENTS - Shows in "Today's Schedule"
             // Format: { date: "YYYY-MM-DD", time: "HH:MM", text: "Event", featured: true/false, icon: "emoji" }
             // IMPORTANT: Date must be in YYYY-MM-DD format with leading zeros (e.g., "2026-03-05" not "2026-03-5")
-            const SPECIFIC_DATE_EVENTS = [
+            let SPECIFIC_DATE_EVENTS = [
                 {
                     date: "2026-06-17",
                     time: "07:00",
@@ -527,7 +542,7 @@
             ];
 
             // RECURRING WEEKLY EVENTS (Same day/time every week)
-            const WEEKLY_EVENTS = [
+            let WEEKLY_EVENTS = [
                 {
                     dayOfWeek: 0,
                     time: "10:30",
@@ -538,7 +553,7 @@
             ];
 
             // DAILY REMINDERS (Every day - pop-up only, not in schedule)
-            const DAILY_REMINDERS = [
+            let DAILY_REMINDERS = [
                 {
                     time: "08:00",
                     text: "Morning medication",
@@ -567,10 +582,10 @@
                 //{ time: "15:00", text: "Time to stretch your legs", featured: true, icon: "🦵", videoId: "LEG_VIDEO_ID" },
             ];
 
-            const WEEKLY_REMINDERS = [];
+            let WEEKLY_REMINDERS = [];
 
             // RECURRING REMINDERS (Throughout the day - pop-up only, not in schedule)
-            const RECURRING_REMINDERS = [
+            let RECURRING_REMINDERS = [
                 {
                     interval: 60,
                     startTime: "11:00",
@@ -591,14 +606,14 @@
 
             // HOLIDAYS - Auto-shows in "For Today" with festive colors
 
-            const DAILY_SUGGESTIONS = [{ text: "Breathe deeply", icon: "🧘🏾‍♀️" }];
+            let DAILY_SUGGESTIONS = [{ text: "Breathe deeply", icon: "🧘🏾‍♀️" }];
 
-            const WEEKLY_SUGGESTIONS = [
+            let WEEKLY_SUGGESTIONS = [
                 { dayOfWeek: 1, text: "Call a friend?", icon: "💬" },
                 { dayOfWeek: 4, text: "Call a friend?", icon: "💬" },
             ];
 
-            const SPECIFIC_SUGGESTIONS = [
+            let SPECIFIC_SUGGESTIONS = [
     { date: "2026-07-02", text: "Call Louis?", icon: "📞" },
      { date: "2026-06-29", text: "Al's birthday! 🎂", icon: "🎉" },
     { date: "2026-05-17", text: "Olen's birthday!", icon: "🎂" },
@@ -1262,7 +1277,188 @@
                 }
             }
 
-            function init() {
+            // ============================================
+            // REMOTE CONFIG FUNCTIONS (MemoryLUV Pro dogfood)
+            // ============================================
+
+            // Bundles the config currently baked into this file,
+            // used to seed the remote store on first connect.
+            function localConfigSnapshot() {
+                return {
+                    location: LOCATION,
+                    weeklyCaregivers: WEEKLY_CAREGIVERS,
+                    substituteCaregivers: SUBSTITUTE_CAREGIVERS,
+                    nightCaregivers: NIGHT_CAREGIVERS,
+                    substituteNightCaregivers: SUBSTITUTE_NIGHT_CAREGIVERS,
+                    specificDateEvents: SPECIFIC_DATE_EVENTS,
+                    weeklyEvents: WEEKLY_EVENTS,
+                    dailyReminders: DAILY_REMINDERS,
+                    weeklyReminders: WEEKLY_REMINDERS,
+                    recurringReminders: RECURRING_REMINDERS,
+                    dailySuggestions: DAILY_SUGGESTIONS,
+                    weeklySuggestions: WEEKLY_SUGGESTIONS,
+                    specificSuggestions: SPECIFIC_SUGGESTIONS,
+                };
+            }
+
+            // Applies a fetched config, field by field. Any field missing
+            // from the remote config keeps its current (baked-in) value.
+            function applyRemoteConfig(cfg) {
+                if (!cfg || typeof cfg !== "object") return;
+                if (typeof cfg.location === "string" && cfg.location)
+                    LOCATION = cfg.location;
+                if (Array.isArray(cfg.weeklyCaregivers))
+                    WEEKLY_CAREGIVERS = cfg.weeklyCaregivers;
+                if (Array.isArray(cfg.substituteCaregivers))
+                    SUBSTITUTE_CAREGIVERS = cfg.substituteCaregivers;
+                if (Array.isArray(cfg.nightCaregivers))
+                    NIGHT_CAREGIVERS = cfg.nightCaregivers;
+                if (Array.isArray(cfg.substituteNightCaregivers))
+                    SUBSTITUTE_NIGHT_CAREGIVERS =
+                        cfg.substituteNightCaregivers;
+                if (Array.isArray(cfg.specificDateEvents))
+                    SPECIFIC_DATE_EVENTS = cfg.specificDateEvents;
+                if (Array.isArray(cfg.weeklyEvents))
+                    WEEKLY_EVENTS = cfg.weeklyEvents;
+                if (Array.isArray(cfg.dailyReminders))
+                    DAILY_REMINDERS = cfg.dailyReminders;
+                if (Array.isArray(cfg.weeklyReminders))
+                    WEEKLY_REMINDERS = cfg.weeklyReminders;
+                if (Array.isArray(cfg.recurringReminders))
+                    RECURRING_REMINDERS = cfg.recurringReminders;
+                if (Array.isArray(cfg.dailySuggestions))
+                    DAILY_SUGGESTIONS = cfg.dailySuggestions;
+                if (Array.isArray(cfg.weeklySuggestions))
+                    WEEKLY_SUGGESTIONS = cfg.weeklySuggestions;
+                if (Array.isArray(cfg.specificSuggestions))
+                    SPECIFIC_SUGGESTIONS = cfg.specificSuggestions;
+            }
+
+            // Fetch config from the Worker. Runs on every page load —
+            // and the display already reloads every 15 minutes, so that
+            // IS the polling cycle. Fallback order:
+            //   1. Live config from the Worker
+            //   2. Last successfully fetched config (cached locally)
+            //   3. The config baked into this file
+            // The display never breaks because of a network problem.
+            async function loadRemoteConfig() {
+                if (!WORKER_URL || WORKER_URL.indexOf("PASTE-") === 0) {
+                    console.log(
+                        "Remote config: no Worker URL set — running fully local.",
+                    );
+                    return;
+                }
+                const endpoint =
+                    WORKER_URL.replace(/\/+$/, "") + "/config/" + DISPLAY_ID;
+                try {
+                    const controller = new AbortController();
+                    const timer = setTimeout(() => controller.abort(), 8000);
+                    const resp = await fetch(endpoint, {
+                        headers: { "X-LUV-Key": DISPLAY_KEY },
+                        signal: controller.signal,
+                    });
+                    clearTimeout(timer);
+
+                    if (resp.status === 404) {
+                        // First connect ever: seed the store with the
+                        // schedule currently baked into this file.
+                        console.log(
+                            "Remote config: store is empty — seeding with local config.",
+                        );
+                        await fetch(endpoint, {
+                            method: "PUT",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-LUV-Key": DISPLAY_KEY,
+                            },
+                            body: JSON.stringify(localConfigSnapshot()),
+                        });
+                        return;
+                    }
+
+                    if (!resp.ok) throw new Error("HTTP " + resp.status);
+
+                    const data = await resp.json();
+                    if (data && data.ok && data.config) {
+                        applyRemoteConfig(data.config);
+                        REMOTE_LAST_UPDATED = data.updated || null;
+                        try {
+                            localStorage.setItem(
+                                "luv_remote_cfg",
+                                JSON.stringify(data.config),
+                            );
+                        } catch (e) {}
+                        console.log(
+                            "Remote config applied. Last saved: " +
+                                (data.updated || "unknown"),
+                        );
+                    }
+                } catch (err) {
+                    console.warn(
+                        "Remote config unavailable — using cached/local config.",
+                        err,
+                    );
+                    try {
+                        const cached =
+                            localStorage.getItem("luv_remote_cfg");
+                        if (cached) applyRemoteConfig(JSON.parse(cached));
+                    } catch (e) {}
+                }
+            }
+
+            // Fast poll: every 60 seconds, quietly ask the Worker if the
+            // config has changed since we last saw it. If yes, apply it
+            // in place — no page reload, no white flash. This is what makes
+            // a phone edit show up on the display within about a minute.
+            var REMOTE_LAST_UPDATED = null;
+            async function pollRemoteConfig() {
+                if (!WORKER_URL || WORKER_URL.indexOf("PASTE-") === 0) return;
+                if (activeFeature) return; // never disturb an active reminder
+                const endpoint =
+                    WORKER_URL.replace(/\/+$/, "") + "/config/" + DISPLAY_ID;
+                try {
+                    const controller = new AbortController();
+                    const timer = setTimeout(() => controller.abort(), 8000);
+                    const resp = await fetch(endpoint, {
+                        headers: { "X-LUV-Key": DISPLAY_KEY },
+                        signal: controller.signal,
+                    });
+                    clearTimeout(timer);
+                    if (!resp.ok) return; // quiet failure — reload cycle is the backstop
+                    const data = await resp.json();
+                    if (!data || !data.ok || !data.config) return;
+                    if (data.updated === REMOTE_LAST_UPDATED) return; // nothing new
+                    const oldLocation = LOCATION;
+                    applyRemoteConfig(data.config);
+                    REMOTE_LAST_UPDATED = data.updated || null;
+                    try {
+                        localStorage.setItem(
+                            "luv_remote_cfg",
+                            JSON.stringify(data.config),
+                        );
+                    } catch (e) {}
+                    generateReminders();
+                    displayCaregiver();
+                    if (LOCATION !== oldLocation) updateWeather();
+                    console.log(
+                        "Config change detected and applied at " +
+                            new Date().toLocaleTimeString(),
+                    );
+                } catch (err) {
+                    // Network hiccup — do nothing; next poll or the
+                    // 15-minute reload will catch up.
+                }
+            }
+
+            // ============================================
+            // END REMOTE CONFIG FUNCTIONS
+            // ============================================
+
+            async function init() {
+                // Fetch remote config first so everything below renders
+                // with the freshest schedule. Waits at most 8 seconds.
+                await loadRemoteConfig();
+
                 // Generate holidays for the current year
                 const currentYear = new Date().getFullYear();
                 HOLIDAYS = getDynamicHolidays(currentYear);
@@ -1273,6 +1469,7 @@
                 displayCaregiver();
                 setInterval(updateTime, 1000);
                 setInterval(checkForRefresh, 60 * 1000);
+                setInterval(pollRemoteConfig, 60 * 1000);
                 weatherUpdateInterval = setInterval(
                     updateWeather,
                     30 * 60 * 1000,
@@ -1288,7 +1485,7 @@
                     }
                 }, 60 * 1000);
                 console.log(
-                    "Memory Display v6.5 initialized - Dynamic holidays enabled, styled countdown, muted autoplay",
+                    "Memory Display v6.6 initialized - Remote config (Pro dogfood), Large Print restored, dynamic holidays, styled countdown, muted autoplay",
                 );
             }
 
